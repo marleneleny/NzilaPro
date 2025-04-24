@@ -58,9 +58,9 @@ body{
   }
 
   .btn{
-    @apply w-[27.5rem] h-[3.4rem] rounded-lg bg-[#5E63BF] text-white cursor-pointer hover:bg-[#5055b1] 
+    @apply w-[27.5rem] h-[3.4rem] rounded-lg bg-[#8AAC11] text-white cursor-pointer transition duration-300 hover:bg-[#96b426] 
   }
 
   .input{
-    @apply placeholder:text-black   pl-11 mt-[2.87rem] text-black pb-[8px] w-[27.37rem] border-b border-[#AFAFAF] outline-none focus:border-[#117D77]
+    @apply placeholder:text-black/60   pl-11 mt-[1.625rem]  w-[27.5rem] h-[3.70rem] border border-[#AFAFAF] outline-none focus:border-[#117D77] rounded-lg m-0
   }
