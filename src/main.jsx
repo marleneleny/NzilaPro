@@ -5,7 +5,14 @@ import { AuthContextProvider } from "./context/AuthContext"; // Importando o pro
 import App from "./App";
 import Cadastro from "./pages/Cadastro";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import "./index.css";
+import Mentorias from "./pages/Mentorias";
+import SobreNos from "./pages/SobreNos";
+import Candidaturas from "./pages/Candidaturas";
+import Termos from "./pages/Termos";
+import HomeEmpresa from "./pages/HomeEmpresa";
+import SelectAccountType from "./pages/SelectAccountType";
 
 // Configurando as rotas
 const router = createBrowserRouter([
@@ -20,6 +27,34 @@ const router = createBrowserRouter([
       {
         path: "home", // Página da geração da historia
         element: <Home />,
+      },
+      {
+        path: "login", // Página da geração da historia
+        element: <Login />,
+      },
+      {
+        path: "mentorias", // Página da geração da historia
+        element: <Mentorias />,
+      },
+      {
+        path: "sobrenos", // Página da geração da historia
+        element: <SobreNos />,
+      },
+      {
+        path: "candidaturas", // Página da geração da historia
+        element: <Candidaturas />,
+      },
+       {
+        path: "termosdepolitica", // Página da geração da historia
+        element: <Termos />,
+      },
+       {
+        path: "homeEmpresa", // Página da geração da historia
+        element: <HomeEmpresa />,
+      },
+      {
+        path: "selectAccountType", // Página da geração da historia
+        element: <SelectAccountType />,
       },
     ],
   },

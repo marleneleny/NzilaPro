@@ -1,16 +1,10 @@
-
-
-import Formulario from '../componentes/Formulario'
-
+import { useEffect } from "react";
+import Formulario from "../componentes/Formulario";
 
 export default function Cadastro() {
-
   return (
     <>
-
-
-      <Formulario/>
+      <Formulario />
     </>
-  )
+  );
 }
-

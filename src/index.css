@@ -1,4 +1,6 @@
-@import "@fontsource/poppins"; /* Importa Poppins */
+@import "@fontsource/poppins"; 
+@import "@fontsource/inter"; 
+@import "@fontsource/bebas-neue";
 
 
 @tailwind base;
@@ -18,6 +20,29 @@ body{
   }
   .nav-list {
     @apply flex gap-[42px];
+  }
+
+  .bg-conic-gradient {
+  background: conic-gradient(from 0deg, #465803, #4b5f03, #113802, #01312b, #26aba4, rgb(2, 31, 51));
+}
+
+  @keyframes spinBlob {
+  0% {
+    transform: rotate(0deg) scale(2);
+  }
+  100% {
+    transform: rotate(1turn) scale(2);
+  }
+}
+
+@layer utilities {
+  .animate-spinBlob {
+    animation: spinBlob 8s linear infinite;
+  }
+}
+
+  .paragrafo-T{
+    @apply w-[48rem] ml-[19rem] text-base mb-5 font-inter text-[#AEABAB]
   }
 
   .barraPesquisa{

@@ -10,10 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/bebas-neue": "^5.2.5",
+    "@fontsource/inter": "^5.2.5",
     "@fontsource/poppins": "^5.2.5",
     "aos": "^2.3.4",
     "axios": "^1.8.2",
     "firebase": "^11.4.0",
+    "lucide-react": "^0.508.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0"

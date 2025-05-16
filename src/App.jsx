@@ -7,16 +7,11 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (User) {
-      console.log("Usuário autenticado, redirecionando para ...");
-      navigate("/home", { replace: true });
-    } else {
-      console.log(
-        "Nenhum usuário autenticado, redirecionando para cadastro..."
-      );
+    if (!User) {
       navigate("/cadastro", { replace: true });
-    }
-  }, [User, navigate]);
+    } 
+      
+    }, [User, navigate]);
 
   return (
     <div>

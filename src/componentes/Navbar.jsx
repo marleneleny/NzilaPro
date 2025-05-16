@@ -1,6 +1,4 @@
 import logo from "../assets/logo.svg";
-import lupa from "../assets/lupa.png";
-import email from "../assets/email.png";
 import notificacao from "../assets/notificacao.png";
 import curvas from "../assets/curvas.png";
 import { Link } from "react-router-dom";

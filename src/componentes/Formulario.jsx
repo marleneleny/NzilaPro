@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, firestore } from "../services/firebase";
+import { auth, db } from "../services/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import useAuth from "../hooks/useAuth";
 import logo from "../assets/logo.svg";
 import google from "../assets/google.svg";
@@ -13,120 +13,233 @@ import docum from "../assets/doc.svg";
 import cadeado from "../assets/cadeado.svg";
 import phone from "../assets/phone.svg";
 import { Link } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
-// ... seus imports permanecem os mesmos ...
 function Formulario() {
-  const { SetUser, User } = useAuth();
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    accountType: "",
-    contact: "",
-    fullName: "",
-    area: "",
-    agreeTerms: false,
+   // First, initialize your hooks and variables
+const { SetUser, User } = useAuth();
+const navigate = useNavigate();
+const [step, setStep] = useState(1);
+const [formData, setFormData] = useState({
+  accountType: "",
+  contact: "",
+  fullName: "",
+  area: "",
+  agreeTerms: false,
+  avatar: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+});
+
+const [error, setError] = useState({ message: "", color: "" });
+
+// Then, define your useEffect
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Fetch the user data from Firestore
+      const userRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userRef);
+      
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        console.log("User data from Firestore:", userData);
+        
+        // Check accountType and navigate based on it
+        const accountType = userData.accountType?.trim().toLowerCase();
+        console.log("Account type from Firestore:", accountType);
+        
+        if (accountType === "empresa") {
+          console.log("Redirecting to empresa");
+          navigate("/homeEmpresa", { replace: true });
+        } else if (accountType === "profissional") {
+          console.log("Redirecting to home");
+          navigate("/home", { replace: true });
+        } else {
+          console.log("No account type found, redirecting to select account type");
+          navigate("/selectAccountType", { replace: true });
+        }
+      } else {
+        // No user data in Firestore
+        console.log("No user data in Firestore, redirecting to select account type");
+        navigate("/selectAccountType", { replace: true });
+      }
+    }
   });
-  
-  const [error, setError] = useState({ message: "", color: "" });
 
-  const handleGoogleLogin = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+  return () => unsubscribe();
+}, [navigate]); // Add navigate as a dependency
 
-      if (result.user) {
-        const { uid, displayName, photoURL, email } = result.user;
-        if (!displayName || !photoURL)
-          throw new Error("O usuário não tem foto ou nome.");
+// Then define your handlers
+const handleChange = (e) => {
+  setFormData({ ...formData, [e.target.name]: e.target.value });
+};
 
-        SetUser({
-          id: uid,
+const angolanPhoneRegex = /^(\+244)?9\d{8}$/;
+
+const handleNext = () => {
+  const requiredFields = ["accountType", "contact", "fullName", "area"];
+  const missing = requiredFields.some((field) => !formData[field]);
+
+  if (missing) {
+    setError({
+      message: "Por favor, preencha todos os campos.",
+      color: "text-red-500",
+    });
+    return;
+  }
+
+  if (!angolanPhoneRegex.test(formData.contact)) {
+    setError({
+      message: "Número de telefone inválido. Ex: +2449******** ou 9********",
+      color: "text-red-500",
+    });
+    return;
+  }
+
+  if (!formData.agreeTerms) {
+    setError({
+      message: "Você deve aceitar os termos para continuar.",
+      color: "text-red-500",
+    });
+    return;
+  }
+
+  setError({ message: "", color: "" });
+  setStep(2);
+};
+
+const handleGoogleLogin = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    if (result.user) {
+      const { uid, displayName, photoURL, email } = result.user;
+      if (!displayName || !photoURL)
+        throw new Error("O usuário não tem foto ou nome.");
+
+      // Salvar/verificar dados no Firestore
+      const userRef = doc(db, "users", uid);
+      const docSnap = await getDoc(userRef);
+
+      if (!docSnap.exists()) {
+        await setDoc(userRef, {
+          fullName: displayName,
           avatar: photoURL,
-          name: displayName,
           email,
-          type: "google",
+          contact: "",
+          area: "",
+          accountType: "",
         });
       }
-    } catch (error) {
-      console.error("Erro ao autenticar com Google:", error);
-    }
-  };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const angolanPhoneRegex = /^(\+244)?9\d{8}$/;
-
-  const handleNext = () => {
-    const requiredFields = ["accountType", "contact", "fullName", "area"];
-    const missing = requiredFields.some((field) => !formData[field]);
-
-    if (missing) {
-      setError({
-        message: "Por favor, preencha todos os campos.",
-        color: "text-red-500",
+      // Salvar no contexto ou estado
+      SetUser({
+        id: uid,
+        avatar: photoURL,
+        name: displayName,
+        email,
+        type: "",
+        contact: "",
+        area: "",
       });
-      return;
+      navigate("/selectAccountType");
     }
+  } catch (error) {
+    console.error("Erro ao autenticar com Google:", error);
+  }
+};
 
-    if (!angolanPhoneRegex.test(formData.contact)) {
-      setError({
-        message: "Número de telefone inválido. Ex: +2449******** ou 9********",
-        color: "text-red-500",
-      });
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!formData.agreeTerms) {
-      setError({
-        message: "Você deve aceitar os termos para continuar.",
-        color: "text-red-500",
-      });
-      return;
-    }
+  if (!formData.email || !formData.password || !formData.confirmPassword) {
+    setError({ message: "Preencha todos os campos.", color: "text-red-500" });
+    return;
+  }
 
-    setError({ message: "", color: "" });
-    setStep(2);
-  };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    setError({ message: "Email inválido.", color: "text-red-500" });
+    return;
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (formData.password.length < 6) {
+    setError({
+      message: "A senha deve ter pelo menos 6 caracteres.",
+      color: "text-red-500",
+    });
+    return;
+  }
 
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setError({ message: "Preencha todos os campos.", color: "text-red-500" });
-      return;
-    }
+  if (formData.password !== formData.confirmPassword) {
+    setError({ message: "As senhas não coincidem.", color: "text-red-500" });
+    return;
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError({ message: "Email inválido.", color: "text-red-500" });
-      return;
-    }
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.password
+    );
 
-    if (formData.password.length < 6) {
-      setError({
-        message: "A senha deve ter pelo menos 6 caracteres.",
-        color: "text-red-500",
-      });
-      return;
-    }
+    const user = userCredential.user;
 
-    if (formData.password !== formData.confirmPassword) {
-      setError({ message: "As senhas não coincidem.", color: "text-red-500" });
-      return;
-    }
+    // Log the accountType to debug
+    console.log("Account Type:", formData.accountType);
 
     try {
-      const ref = doc(firestore, "users", formData.email);
-      await setDoc(ref, formData);
-
-      SetUser({ email: formData.email, ...formData });
-      navigate("/home");
-    } catch (err) {
-      console.error("Erro ao salvar os dados:", err);
+      await setDoc(doc(db, "users", user.uid), {
+        email: formData.email,
+        contact: formData.contact,
+        fullName: formData.fullName,
+        area: formData.area,
+        accountType: formData.accountType,
+        password: formData.password,
+      });
+      
+      // Atualiza contexto
+      SetUser({
+        id: user.uid,
+        email: user.email,
+        name: formData.fullName,
+        type: "email",
+        accountType: formData.accountType,
+      });
+      
+      // Normalize the accountType value for comparison
+      const normalizedAccountType = formData.accountType?.trim().toLowerCase();
+      console.log("Normalized Account Type:", normalizedAccountType);
+      
+      // Manually navigate instead of letting the useEffect handle it
+      if (normalizedAccountType === "empresa") {
+        console.log("Redirecting to empresa");
+        navigate("/homeEmpresa", { replace: true });
+      } else if (normalizedAccountType === "profissional") {
+        console.log("Redirecting to regular home");
+        navigate("/home", { replace: true });
+      } else {
+        console.log("Account type not recognized");
+        navigate("/selectAccountType", { replace: true });
+      }
+      
+    } catch (firestoreError) {
+      console.error("Erro ao salvar no Firestore:", firestoreError.message);
+      setError({
+        message: "Erro ao salvar no banco de dados.",
+        color: "text-red-500",
+      });
+      return;
     }
-  };
+  } catch (err) {
+    console.error("Erro ao cadastrar:", err.message);
+    setError({ message: err.message, color: "text-red-500" });
+  }
+};
 
   return (
     <div className="flex">
@@ -175,7 +288,7 @@ function Formulario() {
               value={formData.fullName}
               onChange={handleChange}
             />
-  
+
             <img className="absolute top-[21.5rem] ml-3" src={phone} alt="" />
             <input
               className="input"
@@ -186,46 +299,50 @@ function Formulario() {
               onChange={handleChange}
             />
 
-            
-                <img className="absolute mt-[2.8rem] ml-3" src={user} alt="" />
-                <select
-                  className={`input ${
-                    formData.area === "" ? "text-black/60" : "text-black"
-                  }`}
-                  name="area"
-                  value={formData.area}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled hidden>
-                    Área de Atuação
-                  </option>
-                  <option value="Tecnologia">Tecnologia</option>
-                  <option value="Educação">Educação</option>
-                  <option value="Contabilidade">Contabilidade</option>
-                </select>
-             
+            <img className="absolute mt-[2.8rem] ml-3" src={user} alt="" />
+            <select
+              className={`input ${
+                formData.area === "" ? "text-black/60" : "text-black"
+              }`}
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+            >
+              <option value="" disabled hidden>
+                Área de Atuação
+              </option>
+              <option value="Tecnologia">Tecnologia</option>
+              <option value="Educação">Educação</option>
+              <option value="Contabilidade">Contabilidade</option>
+            </select>
 
-            
             {error.message && (
               <p className={`${error.color} text-sm mt-2}`}>{error.message}</p>
             )}
 
-<div className="flex items-center mt-9 mb-8">
-  <input
-    type="checkbox"
-    className="w-[1.2rem] h-[1.2rem] mr-[8px] border-[#AFAFAF] rounded-[6px]"
-    checked={formData.agreeTerms}
-    onChange={(e) =>
-      setFormData((prev) => ({ ...prev, agreeTerms: e.target.checked }))
-    }
-  />
-  <p>
-    Aceito os{" "}
-    <a href="/politica" className="text-blue-600 underline">termos de privacidade</a> e{" "}
-    <a href="/termos" className="text-blue-600 underline">política</a>
-  </p>
-</div>
-
+            <div className="flex items-center mt-9 mb-8">
+              <input
+                type="checkbox"
+                className="w-[1.2rem] h-[1.2rem] mr-[8px] border-[#AFAFAF] rounded-[6px]"
+                checked={formData.agreeTerms}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    agreeTerms: e.target.checked,
+                  }))
+                }
+              />
+              <p>
+                Aceito os{" "}
+                <Link to="/termosdepolitica" className="text-blue-600 underline">
+                  termos de privacidade
+                </Link>{" "}
+                e{" "}
+                <Link to="/termosdepolitica" className="text-blue-600 underline">
+                  política
+                </Link>
+              </p>
+            </div>
 
             <button className="btn" onClick={handleNext}>
               Continuar
@@ -306,6 +423,7 @@ function Formulario() {
       </div>
     </div>
   );
+
 }
 
 export default Formulario;
