@@ -3,6 +3,8 @@
 @import "@fontsource/bebas-neue";
 
 
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,18 +14,19 @@ body{
     @apply font-poppins overflow-x-hidden;
 }
 .nav-link {
-    @apply text-black hover:underline;
+    @apply font-inter p-3 font-medium text-sm transition duration-300 ease-in-out text-[#B0B0B0] hover:text-[#bebebe] hover:font-semibold hover:bg-white/25 hover:rounded;
   }
 
-  .navbar{
-    @apply ml-[12rem] mt-[1.5rem];
-  }
   .nav-list {
-    @apply flex gap-[42px];
+    @apply flex gap-[30px] ;
+  }
+
+  .header{
+    @apply bg-gradient-to-r from-white/20 to-white/10 flex justify-between  mt-9 items-center  rounded-full w-11/12 h-16 
   }
 
   .bg-conic-gradient {
-  background: conic-gradient(from 0deg, #465803, #4b5f03, #113802, #01312b, #26aba4, rgb(2, 31, 51));
+  background: conic-gradient(from 0deg, #465803, #4b5f03, #113802, #01312b, #26aba4, rgb(154, 155, 156));
 }
 
   @keyframes spinBlob {
@@ -39,6 +42,10 @@ body{
   .animate-spinBlob {
     animation: spinBlob 8s linear infinite;
   }
+}
+
+.inscritos{
+  @apply w-10 h-11  rounded-full
 }
 
   .paragrafo-T{
@@ -88,4 +95,36 @@ body{
 
   .input{
     @apply placeholder:text-black/60   pl-11 mt-[1.625rem]  w-[27.5rem] h-[3.70rem] border border-[#AFAFAF] outline-none focus:border-[#117D77] rounded-lg m-0
+  }
+
+  .TitlePrinc{
+    @apply uppercase text-[#BFF205] text-4xl font-bebas mt-10 mb-3
+  }
+
+  .paragPrinc{
+    @apply text-[#AEABAB] text-sm font-inter
+  }
+
+  .divsEncVagas{
+    @apply w-[18.75rem] h-[16.25rem] border border-[#5A7302] border-b-0 ml-6
+  }
+
+  .titleMent{
+    @apply font-inter font-bold text-2xl mt-10 mb-6 ml-6
+  }
+
+  .contentMent{
+    @apply leading-7 text-[#AEABAB] text-sm  ml-6
+  }
+
+  .imgMent{
+    @apply w-full w-96 h-[15.25rem] rounded-t-xl
+  }
+
+  .divsMent{
+    @apply w-[24rem] h-[36.5rem] bg-[#0f0f0f] mr-12 transition duration-300 ease-in-out  hover:cursor-pointer hover:border hover:border-[#BFF205]/50 hover:rounded-xl
+  }
+
+  .blur{
+    @apply blur-[240px] absolute  w-[20rem] h-[20rem] p-4 rounded-full z-0
   }

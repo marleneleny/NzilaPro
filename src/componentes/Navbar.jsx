@@ -1,13 +1,12 @@
 import logo from "../assets/logo.svg";
-import notificacao from "../assets/notificacao.png";
-import curvas from "../assets/curvas.png";
+import notificacao from "../assets/notificacao.svg";
 import { Link } from "react-router-dom";
 
 export default function NavBar() {
   return (
-    <>
-      <div className="flex mt-[28px] ">
-        <img className="ml-10" src={logo} alt="Logo" />
+    <div className=" fixed flex justify-center w-[76rem] z-50 ml-20">
+      <div className="header">
+        <img className="w-[7rem] h-7 ml-14" src={logo} alt="Logo" />
         <nav className="navbar">
           <ul className="nav-list">
             <li>
@@ -32,42 +31,13 @@ export default function NavBar() {
             </li>
           </ul>
         </nav>
-
-        <div>
-          <input
-            className="barraPesquisa"
-            type="search"
-            placeholder="Encontrar vagas"
-            name=""
-            id=""
-          />
-          <img
-            className="absolute top-[3.2rem] left-[64rem]"
-            src={lupa}
-            alt=""
-          />
-        </div>
-        <img
-          className="w-[1.50rem] h-[1.50rem] ml-[2rem] mt-[1.50rem]"
-          src={email}
-          alt=""
-        />
-        <img
-          className="w-[1.75rem] h-[1.75rem] mt-[1.50rem] ml-[2rem]"
-          src={notificacao}
-          alt=""
-        />
-        <div className="w-10 h-10 bg-gray-500 border rounded-[40px] mt-[1rem] ml-[1.50rem]"></div>
+        <img className="w-6 h-6 absolute left-[68rem]" src={notificacao} alt="" />
+        <div className="bg-gray-200 w-10 h-10 mr-28 border rounded-full"></div>
       </div>
-      <hr className="w-full border-0 h-[2px] bg-black/15 mt-[1rem]" />
-      <img className="absolute left-[-11rem] top-52" src={curvas} alt="" />
-      <img
-        className="absolute right-[-10rem] top-[38rem] z-[-1]"
-        src={curvas}
-        alt=""
-      />
-
      
-    </>
+      
+      
+     
+    </div>
   );
 }
