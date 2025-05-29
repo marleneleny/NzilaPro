@@ -40,7 +40,7 @@ export default function ProgressCounter() {
   return (
     <div
       ref={ref}
-      className="bg-[#EEEBEB] rounded-xl p-6 flex justify-between items-center w-[34rem] shadow-md mt-[38rem] ml-24"
+      className="absolute z-30 mt-[20rem] ml-14 bg-[#EEEBEB] rounded-xl p-6 flex justify-between items-center w-[34rem] shadow-md "
     >
       
       <div>
@@ -61,6 +61,7 @@ export default function ProgressCounter() {
         <p className="text-2xl font-bold text-black">{progress}%</p>
         <p className="text-xs text-gray-700">Mentorias abertas</p>
       </div>
+      
     </div>
   );
 }

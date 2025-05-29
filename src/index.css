@@ -22,7 +22,7 @@ body{
   }
 
   .header{
-    @apply bg-gradient-to-r from-white/20 to-white/10 flex justify-between  mt-9 items-center  rounded-full w-11/12 h-16 
+    @apply bg-gradient-to-r from-white/5 to-white/15 flex justify-between  mt-9 items-center  rounded-full w-11/12 h-16 
   }
 
   .bg-conic-gradient {

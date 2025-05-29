@@ -88,9 +88,9 @@ export default function SelectAccountType() {
           });
 
           if (selectedAccountType === "Profissional") {
-            navigate("/home");
+            navigate("/home", { replace: true });
           } else {
-            navigate("/homeEmpresa");
+            navigate("/homeEmpresa", { replace: true });
           }
         } else {
           setError("Usuário não autenticado.");

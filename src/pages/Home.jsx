@@ -12,34 +12,47 @@ import woman from "../assets/woman.png";
 import photoMent from "../assets/photoMent.svg";
 import desempenho from "../assets/desempenho.svg";
 import ProgressCounter from "../componentes/ProgressCounter";
+import NzilaFAQ from "../componentes/NzilaFAQ";
+import NzilaFooter from "../componentes/NzilaFooter";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 export default function home() {
+  
+   useEffect(() => {
+      AOS.init({
+        duration: 2000, // Duração da animação
+        once: true, // A animação ocorre apenas uma vez
+      });
+    }, []);
+
   return (
     <div className="min-h-screen w-full bg-[#060B0D] text-white">
       <NavBar />
       <div className="blur bg-[#8A8B87] "></div>
-      <img className="mt-8 " src={circle} alt="" />
+      <img className="pt-20 " src={circle} alt="" />
 
-      <div className="absolute top-72 left-12">
-        <p className="font-inter text-base">
+      <div data-aos="fade-up" className="absolute top-72 left-12">
+        <p data-aos="fade-up" className="font-inter text-base">
           Seu Caminho para Grandes Oportunidades.
         </p>
-        <h1 className="font-poppins font-bold text-[45px] leading-[45px]">
+        <h1 data-aos="fade-up" className="font-poppins font-bold text-[45px] leading-[45px]">
           Encontre vagas de <br />{" "}
           <span className="text-[#BFF205]">emprego</span> que combinam <br />{" "}
           com suas habilidades.
         </h1>
       </div>
-      <div className="absolute right-72 top-40 z-10">
+      <div data-aos="fade-up" className="absolute right-72 top-40 z-10">
         <img className="" src={mockut} alt="" />
         <img className="absolute top-48 left-52" src={mockut2} alt="" />
       </div>
-      <p className="font-bebas text-[#414141] text-9xl absolute top-80 left-[50rem]">
+      <p  data-aos="fade-up"className="font-bebas text-[#414141] text-9xl absolute top-80 left-[50rem]">
         Profissionalismo
       </p>
 
-      <hr className="w-3/4 ml-11 mt-32 border-[#4C4C4C]" />
-      <div className="flex">
+      <hr data-aos="fade-up" className="w-2/3 ml-11 mt-60 border-[#4C4C4C]" />
+      <div data-aos="fade-up" className="flex">
         <div className="flex ml-11 mt-7">
           <img
             className="inscritos"
@@ -67,22 +80,22 @@ export default function home() {
             e
           />
         </div>
-        <p className="mt-7 ml-5">
+        <p data-aos="fade-up" className="mt-7 ml-5">
           Mais de <br />
           1k Inscritos{" "}
         </p>
       </div>
-      <hr className="w-3/4 ml-11 mt-7 border-[#4C4C4C]" />
+      <hr data-aos="fade-up" className="w-3/4 ml-11 mt-7 border-[#4C4C4C]" />
       <div className="blur-[240px] absolute bg-[#add33c] w-[26rem] h-[1.75rem] p-4 top-10"></div>
 
-      <div className="relative bottom-[13.75rem]">
+      <div data-aos="fade-up" className="relative bottom-[13.75rem]">
         <img
           className="absolute top-[10rem] left-2 z-0"
           src={decoration}
           alt=""
         />
 
-        <div className="relative z-10 mb-20 mt-[40rem] ml-36 flex items-center border border-[#525252] w-[1082px] h-[20.5rem] rounded-xl bg-black">
+        <div data-aos="fade-up" className="relative z-10 mb-20 mt-[40rem] ml-36 flex items-center border border-[#525252] w-[1082px] h-[20.5rem] rounded-xl bg-black">
           <div className="ml-16">
             <img src={miniCircles} alt="" />
             <h2 className="text-[32px] font-semibold mr-14 text-white">
@@ -101,11 +114,11 @@ export default function home() {
         </div>
       </div>
 
-      <h3 className="text-center font-poppins font-bold text-[42px]">
+      <h3 data-aos="fade-up" className="text-center font-poppins font-bold text-[42px]">
         Os princípios que moldam <br /> nosso caminho
       </h3>
 
-      <div className="flex mt-[11.5rem] mb-[19.25rem]">
+      <div data-aos="fade-up" className="flex mt-[11.5rem] mb-[19.25rem]">
         <div className="ml-[170px] mr-[68px]">
           <img src={missao} alt="" />
           <p className="TitlePrinc">Missão</p>
@@ -140,7 +153,7 @@ export default function home() {
         alt=""
       />
 
-      <div className="ml-20 border border-[#525252] w-[1178px] h-[48rem] rounded-xl bg-black">
+      <div data-aos="fade-up" className="ml-20 border border-[#525252] w-[1178px] h-[48rem] rounded-xl bg-black">
         <img src={circles} alt="" />
 
         <div className="flex flex-col lg:flex-row">
@@ -206,16 +219,16 @@ export default function home() {
         </div>
       </div>
 
-      <div className="mt-56 ml-[38rem] border border-[#504D4D]  flex items-center w-40 h-12">
-        <p className=" font-inter text-center ml-3">Solução completa</p>
+      <div  className="mt-56 ml-[38rem] border border-[#504D4D]  flex items-center w-40 h-12">
+        <p  className=" font-inter text-center ml-3">Solução completa</p>
       </div>
       <img className="absolute ml-[75rem] rotate-180" src={circle} alt="" />
-      <h5 className=" mt-14 font-poppins font-bold text-4xl text-center">
+      <h5 data-aos="fade-up" className=" mt-14 font-poppins font-bold text-4xl text-center">
         Chega de buscar sem sucesso! Aqui você <br /> encontra as melhores
         oportunidades para <p></p> crescer na sua carreira.
       </h5>
 
-      <div className="ml-20 mt-80 border border-[#525252] w-[1178px] h-[48rem] rounded-xl bg-black">
+      <div data-aos="fade-up" className="ml-20 mt-80 border border-[#525252] w-[1178px] h-[48rem] rounded-xl bg-black">
         <img className="absolute rotate-12 mt-2" src={decoration} alt="" />
         <h6 className="font-poppins text-3xl text-center mt-24">
           Independente do seu nível a Nzila é para você
@@ -248,14 +261,14 @@ export default function home() {
         </div>
       </div>
 
-      <h6 className="font-inter font-bold text-4xl mt-72 mb-52 text-center">
+      <h6 data-aos="fade-up" className="font-inter font-bold text-4xl mt-72 mb-52 text-center">
         Explore mentorias que fazem diferença <br /> em qualquer fase da sua
         carreira.
       </h6>
       <div className="blur top-[360rem] bg-[#5A7302]"></div>
       <div className="blur top-[320rem] left-[70rem] bg-[#5A7302]"></div>
 
-      <div className=" relative flex flex-wrap z-10">
+      <div data-aos="fade-up" className=" relative flex flex-wrap z-10">
         <div className="divsMent ml-12">
           <img
             className="imgMent"
@@ -342,23 +355,36 @@ export default function home() {
         </div>
       </div>
 
-      <div className="flex absolute">
-        <img src={desempenho} alt="" />
-        <div>
-          <h6>Acompanhe Seu Desempenho e Cresça na Carreira</h6>
-          <p>
-            Na Nzila, você não apenas encontra vagas, mas também entende o que
-            precisa para conquistar a oportunidade ideal. Nossa plataforma
-            analisa seu perfil, mostra seu desempenho e sugere melhorias para
-            que você esteja sempre um passo à frente no mercado. Com insights
-            personalizados e orientação estratégica, ajudamos você a desenvolver
-            as habilidades certas e a se conectar com vagas alinhadas ao seu
-            crescimento profissional.
-          </p>
-          <button>Ver mais</button>
+      <div data-aos="fade-up" className="">
+        <ProgressCounter />
+
+        <div className="flex mt-72 z-10">
+          <img className="ml-24" src={desempenho} alt="" />
+          <div className="ml-32">
+            <h6 className="font-poppins font-semibold text-3xl mt-12 mb-5">
+              Acompanhe Seu Desempenho <br /> e{" "}
+              <span className="text-[#A1CA0A] ">Cresça na Carreira</span>
+            </h6>
+            <p className="w-[31rem]">
+              Na Nzila, você não apenas encontra vagas, mas também entende o que
+              precisa para conquistar a oportunidade ideal. Nossa plataforma
+              analisa seu perfil, mostra seu desempenho e sugere melhorias para
+              que você esteja sempre um passo à frente no mercado. Com insights
+              personalizados e orientação estratégica, ajudamos você a
+              desenvolver as habilidades certas e a se conectar com vagas
+              alinhadas ao seu crescimento profissional.
+            </p>
+            <button className="transition duration-300 ease-in-out text-black mt-7 bg-[#BFF205] w-48 h-11 rounded-lg hover:bg-[#bff205e3]">
+              Ver mais
+            </button>
+          </div>
         </div>
       </div>
-      <ProgressCounter />
+      <p data-aos="fade-up" className="text-4xl font-poppins font-semibold text-center mt-96 mb-16">Dúvidas frequentes</p>
+      <div data-aos="fade-up"><NzilaFAQ/></div>
+      <NzilaFooter/>
+      
+      
     </div>
   );
 }

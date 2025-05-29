@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { AuthContextProvider } from "./context/AuthContext"; // Importando o provider do contexto
+import { AuthContextProvider } from "./context/AuthContext"; 
 import App from "./App";
 import Cadastro from "./pages/Cadastro";
 import Home from "./pages/Home";
@@ -13,49 +13,85 @@ import Candidaturas from "./pages/Candidaturas";
 import Termos from "./pages/Termos";
 import HomeEmpresa from "./pages/HomeEmpresa";
 import SelectAccountType from "./pages/SelectAccountType";
+import RedirectOnStart from "./componentes/RedirectOnStart";
+import PrivateRoute from "./PrivateRoute";
+import Profile from "./pages/profile";
 
 // Configurando as rotas
 const router = createBrowserRouter([
   {
-    path: "/", // Rota principal
-    element: <App />, // Página principal com redirecionamento
+    path: "/",
+    element: <App />,
     children: [
       {
-        path: "cadastro", // Página de cadastro
+        index: true,
+        element: <RedirectOnStart />
+      },
+      {
+        path: "cadastro",
         element: <Cadastro />,
       },
       {
-        path: "home", // Página da geração da historia
-        element: <Home />,
-      },
-      {
-        path: "login", // Página da geração da historia
+        path: "login",
         element: <Login />,
       },
+
+      // PROTEGIDAS
       {
-        path: "mentorias", // Página da geração da historia
-        element: <Mentorias />,
+        path: "home",
+        element: (
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        ),
       },
       {
-        path: "sobrenos", // Página da geração da historia
+        path: "mentorias",
+        element: (
+          <PrivateRoute>
+            <Mentorias />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "candidaturas",
+        element: (
+          <PrivateRoute>
+            <Candidaturas />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "homeEmpresa",
+        element: (
+          <PrivateRoute>
+            <HomeEmpresa />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "selectAccountType",
+        element: (
+          <PrivateRoute>
+            <SelectAccountType />
+          </PrivateRoute>
+        ),
+      },
+
+      // NÃO PROTEGIDAS
+      {
+        path: "sobrenos",
         element: <SobreNos />,
       },
       {
-        path: "candidaturas", // Página da geração da historia
-        element: <Candidaturas />,
-      },
-       {
-        path: "termosdepolitica", // Página da geração da historia
-        element: <Termos />,
-      },
-       {
-        path: "homeEmpresa", // Página da geração da historia
-        element: <HomeEmpresa />,
+        path: "profile",
+        element: <Profile />,
       },
       {
-        path: "selectAccountType", // Página da geração da historia
-        element: <SelectAccountType />,
+        path: "termosdepolitica",
+        element: <Termos />,
       },
+      
     ],
   },
 ]);

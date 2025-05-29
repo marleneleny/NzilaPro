@@ -13,233 +13,201 @@ import docum from "../assets/doc.svg";
 import cadeado from "../assets/cadeado.svg";
 import phone from "../assets/phone.svg";
 import { Link } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 function Formulario() {
-   // First, initialize your hooks and variables
-const { SetUser, User } = useAuth();
-const navigate = useNavigate();
-const [step, setStep] = useState(1);
-const [formData, setFormData] = useState({
-  accountType: "",
-  contact: "",
-  fullName: "",
-  area: "",
-  agreeTerms: false,
-  avatar: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-});
+  const { SetUser, User, isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    accountType: "",
+    contact: "",
+    fullName: "",
+    area: "",
+    agreeTerms: false,
+    avatar: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-const [error, setError] = useState({ message: "", color: "" });
+  const [error, setError] = useState({ message: "", color: "" });
 
-// Then, define your useEffect
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // Fetch the user data from Firestore
-      const userRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(userRef);
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (!loading && isAuthenticated && User) {
+      const accountType = User.accountType?.trim().toLowerCase();
       
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        console.log("User data from Firestore:", userData);
-        
-        // Check accountType and navigate based on it
-        const accountType = userData.accountType?.trim().toLowerCase();
-        console.log("Account type from Firestore:", accountType);
-        
-        if (accountType === "empresa") {
-          console.log("Redirecting to empresa");
-          navigate("/homeEmpresa", { replace: true });
-        } else if (accountType === "profissional") {
-          console.log("Redirecting to home");
-          navigate("/home", { replace: true });
-        } else {
-          console.log("No account type found, redirecting to select account type");
-          navigate("/selectAccountType", { replace: true });
-        }
+      if (accountType === "empresa") {
+        navigate("/homeEmpresa", { replace: true });
+      } else if (accountType === "profissional") {
+        navigate("/home", { replace: true });
       } else {
-        // No user data in Firestore
-        console.log("No user data in Firestore, redirecting to select account type");
         navigate("/selectAccountType", { replace: true });
       }
     }
-  });
+  }, [isAuthenticated, User, loading, navigate]);
 
-  return () => unsubscribe();
-}, [navigate]); // Add navigate as a dependency
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-// Then define your handlers
-const handleChange = (e) => {
-  setFormData({ ...formData, [e.target.name]: e.target.value });
-};
+  const angolanPhoneRegex = /^(\+244)?9\d{8}$/;
 
-const angolanPhoneRegex = /^(\+244)?9\d{8}$/;
+  const handleNext = () => {
+    const requiredFields = ["accountType", "contact", "fullName", "area"];
+    const missing = requiredFields.some((field) => !formData[field]);
 
-const handleNext = () => {
-  const requiredFields = ["accountType", "contact", "fullName", "area"];
-  const missing = requiredFields.some((field) => !formData[field]);
-
-  if (missing) {
-    setError({
-      message: "Por favor, preencha todos os campos.",
-      color: "text-red-500",
-    });
-    return;
-  }
-
-  if (!angolanPhoneRegex.test(formData.contact)) {
-    setError({
-      message: "Número de telefone inválido. Ex: +2449******** ou 9********",
-      color: "text-red-500",
-    });
-    return;
-  }
-
-  if (!formData.agreeTerms) {
-    setError({
-      message: "Você deve aceitar os termos para continuar.",
-      color: "text-red-500",
-    });
-    return;
-  }
-
-  setError({ message: "", color: "" });
-  setStep(2);
-};
-
-const handleGoogleLogin = async () => {
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-
-    if (result.user) {
-      const { uid, displayName, photoURL, email } = result.user;
-      if (!displayName || !photoURL)
-        throw new Error("O usuário não tem foto ou nome.");
-
-      // Salvar/verificar dados no Firestore
-      const userRef = doc(db, "users", uid);
-      const docSnap = await getDoc(userRef);
-
-      if (!docSnap.exists()) {
-        await setDoc(userRef, {
-          fullName: displayName,
-          avatar: photoURL,
-          email,
-          contact: "",
-          area: "",
-          accountType: "",
-        });
-      }
-
-      // Salvar no contexto ou estado
-      SetUser({
-        id: uid,
-        avatar: photoURL,
-        name: displayName,
-        email,
-        type: "",
-        contact: "",
-        area: "",
+    if (missing) {
+      setError({
+        message: "Por favor, preencha todos os campos.",
+        color: "text-red-500",
       });
-      navigate("/selectAccountType");
+      return;
     }
-  } catch (error) {
-    console.error("Erro ao autenticar com Google:", error);
-  }
-};
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    if (!angolanPhoneRegex.test(formData.contact)) {
+      setError({
+        message: "Número de telefone inválido. Ex: +2449******** ou 9********",
+        color: "text-red-500",
+      });
+      return;
+    }
 
-  if (!formData.email || !formData.password || !formData.confirmPassword) {
-    setError({ message: "Preencha todos os campos.", color: "text-red-500" });
-    return;
-  }
+    if (!formData.agreeTerms) {
+      setError({
+        message: "Você deve aceitar os termos para continuar.",
+        color: "text-red-500",
+      });
+      return;
+    }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    setError({ message: "Email inválido.", color: "text-red-500" });
-    return;
-  }
+    setError({ message: "", color: "" });
+    setStep(2);
+  };
 
-  if (formData.password.length < 6) {
-    setError({
-      message: "A senha deve ter pelo menos 6 caracteres.",
-      color: "text-red-500",
-    });
-    return;
-  }
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
 
-  if (formData.password !== formData.confirmPassword) {
-    setError({ message: "As senhas não coincidem.", color: "text-red-500" });
-    return;
-  }
+      if (result.user) {
+        const { uid, displayName, photoURL, email } = result.user;
+        if (!displayName || !photoURL)
+          throw new Error("O usuário não tem foto ou nome.");
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      formData.email,
-      formData.password
-    );
+        // Verificar/salvar dados no Firestore
+        const userRef = doc(db, "users", uid);
+        const docSnap = await getDoc(userRef);
 
-    const user = userCredential.user;
+        if (!docSnap.exists()) {
+          await setDoc(userRef, {
+            fullName: displayName,
+            avatar: photoURL,
+            email,
+            contact: "",
+            area: "",
+            accountType: "",
+            id: uid
+          });
+        }
 
-    // Log the accountType to debug
-    console.log("Account Type:", formData.accountType);
+        // O AuthContext automaticamente detectará a mudança e redirecionará
+      }
+    } catch (error) {
+      console.error("Erro ao autenticar com Google:", error);
+      setError({
+        message: "Erro ao fazer login com Google. Tente novamente.",
+        color: "text-red-500",
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      setError({ message: "Preencha todos os campos.", color: "text-red-500" });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError({ message: "Email inválido.", color: "text-red-500" });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError({
+        message: "A senha deve ter pelo menos 6 caracteres.",
+        color: "text-red-500",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError({ message: "As senhas não coincidem.", color: "text-red-500" });
+      return;
+    }
 
     try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      const user = userCredential.user;
+
+      // Salvar dados no Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: formData.email,
         contact: formData.contact,
         fullName: formData.fullName,
         area: formData.area,
         accountType: formData.accountType,
-        password: formData.password,
+        avatar: "",
+        id: user.uid
       });
       
-      // Atualiza contexto
-      SetUser({
-        id: user.uid,
-        email: user.email,
-        name: formData.fullName,
-        type: "email",
-        accountType: formData.accountType,
-      });
+      // O AuthContext automaticamente detectará o usuário logado e redirecionará
       
-      // Normalize the accountType value for comparison
-      const normalizedAccountType = formData.accountType?.trim().toLowerCase();
-      console.log("Normalized Account Type:", normalizedAccountType);
+    } catch (err) {
+      console.error("Erro ao cadastrar:", err.message);
       
-      // Manually navigate instead of letting the useEffect handle it
-      if (normalizedAccountType === "empresa") {
-        console.log("Redirecting to empresa");
-        navigate("/homeEmpresa", { replace: true });
-      } else if (normalizedAccountType === "profissional") {
-        console.log("Redirecting to regular home");
-        navigate("/home", { replace: true });
+      // Verificar se é erro de email já existente
+      if (err.code === 'auth/email-already-in-use') {
+        setError({ 
+          message: "Este email já está cadastrado. Tente fazer login ou use outro email.", 
+          color: "text-red-500" 
+        });
+      } else if (err.code === 'auth/weak-password') {
+        setError({ 
+          message: "A senha é muito fraca. Use pelo menos 6 caracteres.", 
+          color: "text-red-500" 
+        });
+      } else if (err.code === 'auth/invalid-email') {
+        setError({ 
+          message: "Email inválido.", 
+          color: "text-red-500" 
+        });
       } else {
-        console.log("Account type not recognized");
-        navigate("/selectAccountType", { replace: true });
+        setError({ 
+          message: "Erro ao criar conta. Tente novamente.", 
+          color: "text-red-500" 
+        });
       }
-      
-    } catch (firestoreError) {
-      console.error("Erro ao salvar no Firestore:", firestoreError.message);
-      setError({
-        message: "Erro ao salvar no banco de dados.",
-        color: "text-red-500",
-      });
-      return;
     }
-  } catch (err) {
-    console.error("Erro ao cadastrar:", err.message);
-    setError({ message: err.message, color: "text-red-500" });
+  };
+
+  // Se ainda estiver carregando, mostrar loading
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#060B0D]">
+        <div className="text-white text-xl">Carregando...</div>
+      </div>
+    );
   }
-};
 
   return (
     <div className="flex">
@@ -317,7 +285,7 @@ const handleSubmit = async (e) => {
             </select>
 
             {error.message && (
-              <p className={`${error.color} text-sm mt-2}`}>{error.message}</p>
+              <p className={`${error.color} text-sm mt-2`}>{error.message}</p>
             )}
 
             <div className="flex items-center mt-9 mb-8">
@@ -412,7 +380,7 @@ const handleSubmit = async (e) => {
             />
 
             {error.message && (
-              <p className={`${error.color} text-sm mt-2}`}>{error.message}</p>
+              <p className={`${error.color} text-sm mt-2`}>{error.message}</p>
             )}
 
             <button className="btn mt-10" type="submit">
@@ -423,7 +391,6 @@ const handleSubmit = async (e) => {
       </div>
     </div>
   );
-
 }
 
-export default Formulario;
+export default Formulario;  
