@@ -15,7 +15,11 @@ import HomeEmpresa from "./pages/HomeEmpresa";
 import SelectAccountType from "./pages/SelectAccountType";
 import RedirectOnStart from "./componentes/RedirectOnStart";
 import PrivateRoute from "./PrivateRoute";
-import Profile from "./pages/profile";
+import Avaliacao from "./componentes/Avaliação";
+import Profile from "./pages/Profile";
+import SobreNosEmpresa from "./pages/SobreNosEmpresa";
+import ProfileEmpresa from "./pages/ProfileEmpresa";
+import PublicarV from "./pages/PublicarV";
 
 // Configurando as rotas
 const router = createBrowserRouter([
@@ -84,12 +88,28 @@ const router = createBrowserRouter([
         element: <SobreNos />,
       },
       {
+        path: "sobrenosempresa",
+        element: <SobreNosEmpresa />,
+      },
+      {
         path: "profile",
         element: <Profile />,
       },
       {
+        path: "profileempresa",
+        element: <ProfileEmpresa />,
+      },
+      {
         path: "termosdepolitica",
         element: <Termos />,
+      },
+       {
+        path: "avaliação",
+        element: <Avaliacao />,
+      },
+      {
+        path: "publicar-vagas",
+        element: <PublicarV />,
       },
       
     ],

@@ -5,7 +5,7 @@ import notificacao from "../assets/notificacao.svg";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
-// Modal de Upload de CV
+// Modal de Upload de CV Melhorado
 const CVUploadModal = ({ isOpen, onClose, onSave }) => {
   const [file, setFile] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -13,6 +13,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Função melhorada para validar se é um CV válido
   const validateCV = async (file) => {
@@ -52,39 +53,86 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     const fileName = file.name.toLowerCase();
     const fileSize = file.size;
 
-    // Sistema de validação mais rigoroso
+    // Sistema de validação melhorado
     let cvScore = 0;
     let rejectionReasons = [];
     let hasPositiveIndicator = false;
 
-    // 1. PRIMEIRA VERIFICAÇÃO: Indicadores NEGATIVOS CRÍTICOS (-100 pontos - rejeição automática)
+    // 1. PRIMEIRA VERIFICAÇÃO: Indicadores NEGATIVOS CRÍTICOS (rejeição automática)
     const criticalNegativeIndicators = [
       // Livros e literatura
-      "livro", "book", "ebook", "romance", "historia", "história", "contos", "conto",
-      "sonhos", "disciplina","desenvolvimento pessoal", 
-      "autoajuda", "auto-ajuda", "motivação", "motivacao", "inspiração", "inspiracao",
-      "reflexões", "reflexoes", "pensamentos", "filosofia", "espiritualidade",
-      
-      // Documentos acadêmicos/técnicos
-      "manual", "tutorial", "tese", "thesis", "dissertação", "dissertacao", 
-      "artigo", "article", "paper", "monografia", "pesquisa", "estudo",
-      
+      "livro",
+      "book",
+      "ebook",
+      "romance",
+      "historia",
+      "história",
+      "contos",
+      "conto",
+      "sonhos",
+      "disciplina",
+      "desenvolvimento pessoal",
+      "autoajuda",
+      "auto-ajuda",
+      "motivação",
+      "motivacao",
+      "inspiração",
+      "inspiracao",
+      "reflexões",
+      "reflexoes",
+      "pensamentos",
+      "filosofia",
+      "espiritualidade",
+
+      // Documentos acadêmicos/técnicos (exceto tese/dissertação que podem ser parte do CV)
+      "manual",
+      "tutorial",
+      "artigo",
+      "article",
+      "paper",
+      "monografia",
+      "pesquisa",
+      "estudo",
+
       // Documentos comerciais
-      "relatório", "relatorio", "report", "apresentação", "apresentacao", 
-      "slides", "powerpoint", "ppt", "planilha", "excel", "contrato", "contract",
-      "invoice", "fatura", "receipt", "comprovante", "catalogo", "catálogo",
-      
+      "relatório",
+      "relatorio",
+      "report",
+      "apresentação",
+      "apresentacao",
+      "slides",
+      "powerpoint",
+      "ppt",
+      "planilha",
+      "excel",
+      "contrato",
+      "contract",
+      "invoice",
+      "fatura",
+      "receipt",
+      "comprovante",
+      "catalogo",
+      "catálogo",
+
       // Mídia e entretenimento
-      "revista", "magazine", "brochure", "folheto", "panfleto", "guia",
-      "receitas", "cookbook", "cardápio", "cardapio"
+      "revista",
+      "magazine",
+      "brochure",
+      "folheto",
+      "panfleto",
+      "guia",
+      "receitas",
+      "cookbook",
+      "cardápio",
+      "cardapio",
     ];
 
-    const hasCriticalNegative = criticalNegativeIndicators.some(indicator => 
+    const hasCriticalNegative = criticalNegativeIndicators.some((indicator) =>
       fileName.includes(indicator.toLowerCase())
     );
 
     if (hasCriticalNegative) {
-      const matchedIndicator = criticalNegativeIndicators.find(indicator => 
+      const matchedIndicator = criticalNegativeIndicators.find((indicator) =>
         fileName.includes(indicator.toLowerCase())
       );
       setValidationResult({
@@ -95,109 +143,205 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       return;
     }
 
-    // 2. SEGUNDA VERIFICAÇÃO: Deve ter pelo menos UM indicador positivo claro
+    // 2. INDICADORES POSITIVOS FORTES (alta confiança de ser CV)
     const strongCVIndicators = [
-      "cv", "curriculo", "currículo", "resume", "curriculum"
+      "cv",
+      "curriculo",
+      "currículo",
+      "resume",
+      "curriculum",
     ];
 
+    // 3. INDICADORES POSITIVOS MODERADOS (profissionais e técnicos)
     const moderateCVIndicators = [
-      "profissional", "professional", "experiencia", "experiência", "experience",
-      "qualificacao", "qualificação", "qualification", "habilidades", "skills",
-      "competencias", "competências", "carreira", "career"
+      "profissional",
+      "professional",
+      "experiencia",
+      "experiência",
+      "experience",
+      "qualificacao",
+      "qualificação",
+      "qualification",
+      "habilidades",
+      "skills",
+      "competencias",
+      "competências",
+      "carreira",
+      "career",
+
+      // Áreas técnicas e profissionais
+      "frontend",
+      "backend",
+      "fullstack",
+      "developer",
+      "programador",
+      "analista",
+      "engenheiro",
+      "designer",
+      "marketing",
+      "vendas",
+      "gestao",
+      "gestão",
+      "administrador",
+      "coordenador",
+      "gerente",
+      "supervisor",
+      "diretor",
+
+      // Áreas específicas
+      "ti",
+      "rh",
+      "financeiro",
+      "comercial",
+      "administrativo",
+      "juridico",
+      "jurídico",
+      "contabil",
+      "contábil",
+      "educacao",
+      "educação",
+      "saude",
+      "saúde",
+
+      // Formação acadêmica comum em CVs
+      "formacao",
+      "formação",
+      "educacao",
+      "educação",
+      "diploma",
+      "certificado",
+      "tese",
+      "thesis",
+      "dissertação",
+      "dissertacao",
+      "mestrado",
+      "doutorado",
     ];
 
     // Verificar indicadores fortes de CV
-    const hasStrongCV = strongCVIndicators.some(indicator => 
+    const hasStrongCV = strongCVIndicators.some((indicator) =>
       fileName.includes(indicator)
     );
     if (hasStrongCV) {
-      cvScore += 50;
+      cvScore += 60; // Aumentado de 50 para 60
       hasPositiveIndicator = true;
     }
 
     // Verificar indicadores moderados
-    const hasModerateCV = moderateCVIndicators.some(indicator => 
+    const hasModerateCV = moderateCVIndicators.some((indicator) =>
       fileName.includes(indicator)
     );
     if (hasModerateCV) {
-      cvScore += 25;
+      cvScore += 30; // Aumentado de 25 para 30
       hasPositiveIndicator = true;
     }
 
-    // 3. Padrões de nome que sugerem dados pessoais (nomes próprios)
-    const namePattern = /\b[a-z]{2,}\s+[a-z]{2,}|[a-z]+_[a-z]+_cv|cv_[a-z]+/i;
+    // 4. Padrões de nome que sugerem dados pessoais (nomes próprios)
+    const namePattern =
+      /\b[a-z]{2,}\s+[a-z]{2,}|[a-z]+_[a-z]+(?:_cv|_curriculo|_resume)?|(?:cv|curriculo|resume)_[a-z]+/i;
     if (namePattern.test(fileName)) {
-      cvScore += 20;
+      cvScore += 25; // Aumentado de 20 para 25
       hasPositiveIndicator = true;
     }
 
-    // 4. Verificar se tem pelo menos um indicador positivo
+    // 5. Verificar se tem pelo menos um indicador positivo
     if (!hasPositiveIndicator) {
-      // Sem nenhum indicador positivo, muito suspeito
-      if (Math.random() > 0.8) { // Apenas 20% de chance de passar
-        cvScore += 10;
+      // Verificação mais flexível - se o arquivo parece ter formato de nome pessoal
+      const possiblePersonalName =
+        /^[a-z]+(?:[-_\s][a-z]+)*\.(?:pdf|docx?|doc)$/i.test(fileName);
+      if (possiblePersonalName && Math.random() > 0.5) {
+        // 50% de chance
+        cvScore += 15;
+        hasPositiveIndicator = true;
       } else {
         setValidationResult({
           isValid: false,
-          message: "Nome do arquivo não indica ser um currículo. Use nomes como 'MeuCV.pdf', 'Curriculo_NomeSobrenome.pdf' ou similar.",
+          message:
+            "Nome do arquivo não indica ser um currículo. Use nomes como 'MeuCV.pdf', 'Curriculo_NomeSobrenome.pdf' ou similar.",
         });
         setIsValidating(false);
         return;
       }
     }
 
-    // 5. Nomes muito genéricos são suspeitos
+    // 6. Nomes muito genéricos são suspeitos (penalização reduzida)
     const genericNames = [
-      "documento", "document", "arquivo", "file", "texto", "text", 
-      "untitled", "sem titulo", "novo", "new", "temp", "temporario",
-      "download", "anexo", "attachment"
+      "documento",
+      "document",
+      "arquivo",
+      "file",
+      "texto",
+      "text",
+      "untitled",
+      "sem titulo",
+      "novo",
+      "new",
+      "temp",
+      "temporario",
+      "download",
+      "anexo",
+      "attachment",
     ];
-    const hasGenericName = genericNames.some(generic => fileName.includes(generic));
+    const hasGenericName = genericNames.some((generic) =>
+      fileName.includes(generic)
+    );
     if (hasGenericName) {
-      cvScore -= 30;
+      cvScore -= 20; // Reduzido de 30 para 20
       rejectionReasons.push("Nome muito genérico para um CV");
     }
 
-    // 6. Análise de tamanho - Faixa ideal para CVs (30KB - 2MB)
-    if (fileSize < 30 * 1024) {
-      cvScore -= 40; // Muito pequeno para ser CV
-      rejectionReasons.push("Arquivo muito pequeno para um CV (menos de 30KB)");
-    } else if (fileSize >= 30 * 1024 && fileSize <= 2 * 1024 * 1024) {
-      cvScore += 15; // Tamanho adequado para CV
-    } else if (fileSize > 2 * 1024 * 1024) {
-      cvScore -= 25; // Muito grande para CV típico
-      rejectionReasons.push("Arquivo muito grande para um CV típico (mais de 2MB)");
+    // 7. Análise de tamanho mais flexível
+    if (fileSize < 20 * 1024) {
+      // Reduzido de 30KB para 20KB
+      cvScore -= 30; // Reduzido de 40 para 30
+      rejectionReasons.push("Arquivo muito pequeno para um CV (menos de 20KB)");
+    } else if (fileSize >= 20 * 1024 && fileSize <= 3 * 1024 * 1024) {
+      // Aumentado limite para 3MB
+      cvScore += 20; // Aumentado de 15 para 20
+    } else if (fileSize > 3 * 1024 * 1024) {
+      cvScore -= 15; // Reduzido de 25 para 15
+      rejectionReasons.push(
+        "Arquivo muito grande para um CV típico (mais de 3MB)"
+      );
     }
 
-    // 7. Extensões inadequadas
-    if (fileName.endsWith('.txt')) {
-      cvScore -= 40;
+    // 8. Extensões inadequadas (penalização reduzida)
+    if (fileName.endsWith(".txt")) {
+      cvScore -= 30; // Reduzido de 40 para 30
       rejectionReasons.push("Formato .txt é inadequado para CV profissional");
     }
 
-    // DECISÃO FINAL com critérios mais rigorosos
+    // DECISÃO FINAL com critérios mais flexíveis
     let isLikelyCV = false;
     let validationMessage = "";
 
     console.log(`Score do arquivo "${fileName}": ${cvScore}`);
 
-    if (cvScore >= 40) {
+    if (cvScore >= 35) {
+      // Reduzido de 40 para 35
       isLikelyCV = true;
-      validationMessage = "Currículo válido! Documento identificado como CV profissional.";
-    } else if (cvScore >= 20 && hasPositiveIndicator) {
-      // Zona de incerteza - mais criterioso
-      if (Math.random() > 0.6) { // 40% chance de aceitar
+      validationMessage =
+        "Currículo válido! Documento identificado como CV profissional.";
+    } else if (cvScore >= 15 && hasPositiveIndicator) {
+      // Reduzido de 20 para 15
+      // Zona de incerteza - mais permissiva
+      if (Math.random() > 0.3) {
+        // 70% chance de aceitar (era 40%)
         isLikelyCV = true;
-        validationMessage = "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
+        validationMessage =
+          "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
       } else {
         isLikelyCV = false;
-        validationMessage = "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
+        validationMessage =
+          "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
       }
     } else {
       // Rejeição
       isLikelyCV = false;
-      const reasons = rejectionReasons.length > 0 ? rejectionReasons.join('. ') : 
-        "Arquivo não identificado como currículo profissional";
+      const reasons =
+        rejectionReasons.length > 0
+          ? rejectionReasons.join(". ")
+          : "Arquivo não identificado como currículo profissional";
       validationMessage = `${reasons}. Por favor, envie um arquivo com nome indicativo de CV (ex: MeuCV.pdf, Curriculo_Nome.pdf).`;
     }
 
@@ -246,9 +390,14 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setIsDragging(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (validationResult?.isValid && file) {
-      onSave(file);
+      setIsSaving(true);
+      try {
+        await onSave(file);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -257,11 +406,11 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setValidationResult(null);
     setUploadProgress(0);
     setIsValidating(false);
+    setIsSaving(false); // Adicione esta linha
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
-
   const handleClose = () => {
     resetModal();
     onClose();
@@ -393,14 +542,21 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
           </button>
           <button
             onClick={handleSave}
-            disabled={!validationResult?.isValid}
-            className={`flex-1 px-4 py-2 rounded-md transition-colors ${
-              validationResult?.isValid
+            disabled={!validationResult?.isValid || isSaving}
+            className={`flex-1 px-4 py-2 rounded-md transition-colors flex items-center justify-center ${
+              validationResult?.isValid && !isSaving
                 ? "bg-green-600 text-white hover:bg-green-700"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            Salvar
+            {isSaving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Salvando...
+              </>
+            ) : (
+              "Salvar"
+            )}
           </button>
         </div>
       </div>
@@ -413,10 +569,23 @@ export default function NavBar() {
   const [userAvatar, setUserAvatar] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [userCV, setUserCV] = useState(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
   const defaultAvatar =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999999'%3E%3Cpath d='M12 4c1.93 0 3.5 1.57 3.5 3.5S13.93 11 12 11s-3.5-1.57-3.5-3.5S10.07 4 12 4zm0 9c2.67 0 8 1.34 8 4v1H4v-1c0-2.66 5.33-4 8-4z'/%3E%3C/svg%3E";
+
+  // Effect para detectar scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      setIsScrolled(scrollTop > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (User) {
@@ -466,25 +635,38 @@ export default function NavBar() {
   };
 
   const handleCVSave = (file) => {
+    console.log("CV salvo:", file);
+
+    // Criar dados do CV para salvar
     const cvData = {
       name: file.name,
       size: file.size,
       type: file.type,
       uploadDate: new Date().toISOString(),
+      // Aqui você pode adicionar mais campos conforme necessário
     };
 
+    // Atualizar estado e localStorage
     setUserCV(cvData);
     localStorage.setItem("userCV", JSON.stringify(cvData));
+
+    // Fechar modal
     setShowUploadModal(false);
 
+    // Navegar diretamente para candidaturas
     navigate("/candidaturas");
 
-    console.log("CV salvo:", cvData);
+    // Aqui você pode implementar a lógica para enviar o arquivo para o servidor
+    // Por exemplo: uploadCVToServer(file, cvData)
   };
 
   return (
     <>
-      <div className="fixed flex justify-center w-[76rem] z-50 ml-20">
+      <div
+        className={`fixed flex justify-center w-[76rem] z-50 ml-9 transition-all duration-300 ${
+          isScrolled ? "bg-black/80 backdrop-blur-sm" : "bg-transparent"
+        }`}
+      >
         <div className="header">
           <img className="w-[7rem] h-7 ml-14" src={logo} alt="Logo" />
           <nav className="navbar">
@@ -509,12 +691,12 @@ export default function NavBar() {
                 </a>
               </li>
               <li>
-                <Link to="/servicos" className="nav-link">
+                <Link to="/mentorias" className="nav-link">
                   Mentorias
                 </Link>
               </li>
               <li>
-                <Link to="/contato" className="nav-link">
+                <Link to="/sobrenos" className="nav-link">
                   Sobre nós
                 </Link>
               </li>
@@ -541,7 +723,7 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* Modal de Upload */}
+      {/* Modal de Upload CV */}
       <CVUploadModal
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}

@@ -128,3 +128,7 @@ body{
   .blur{
     @apply blur-[240px] absolute  w-[20rem] h-[20rem] p-4 rounded-full z-0
   }
+
+  .imgCards{
+    @apply w-6 h-6 text-gray-900 mb-8 ml-40
+  }

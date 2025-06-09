@@ -1,9 +1,9 @@
 import NavBar from "../componentes/Navbar";
-import NzilaFooter from "../componentes/NzilaFooter"; // Assuming NzilaFooter is a common component
+import NzilaFooter from "../componentes/NzilaFooter"; 
+import NavBarEmpresa from "../componentes/NavBarEmpresa"; 
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
-
 
 import aboutUsHero from "../assets/unsplash_office_hero.jpg";
 import office1 from "../assets/unsplash_office1.jpg";
@@ -15,7 +15,7 @@ import team4 from "../assets/unsplash_team4.jpg";
 
 import useAuth from "../hooks/useAuth";
 
-export default function SobreNos() {
+export default function SobreNosEmpresa() {
   useEffect(() => {
     AOS.init({
       duration: 2000,
@@ -23,21 +23,22 @@ export default function SobreNos() {
     });
   }, []);
 
+
   return (
     <div className="min-h-screen w-full bg-[#060B0D] text-white font-poppins"> {/* Adjusted background, text color, and main font to Poppins */}
-      <NavBar />
+      <NavBarEmpresa/>
 
       {/* Hero Section */}
       <div className="pt-64 pb-16 bg-[#060B0D] text-center"> {/* Adjusted background */}
         <h1 data-aos="fade-down" className="font-bold text-[70px] md:text-[90px] leading-[1.1] tracking-tight text-white"> {/* Adjusted text color */}
-          ABOUT US.
+          SOBRE NÓS.
         </h1>
       </div>
 
       {/* Company Description */}
       <div data-aos="fade-up" className="container mx-auto px-4 md:px-0 py-12 max-w-4xl text-lg text-[#D7D7D7]/70"> {/* Adjusted text color */}
         <p className="mb-6">
-          A Nzila nasceu da paixão por conectar talentos e empresas em Angola. Fundada em [Ano de Fundação], nossa jornada começou com a visão de simplificar e otimizar o processo de recrutamento, tornando-o mais eficiente e justo para todos.
+          A Nzila nasceu da paixão por conectar talentos e empresas em Angola. Fundada em 2025, nossa jornada começou com a visão de simplificar e otimizar o processo de recrutamento, tornando-o mais eficiente e justo para todos.
         </p>
         <p className="mb-6">
           Ao longo dos anos, construímos uma plataforma robusta e confiável, impulsionada pela nossa dedicação à inovação e ao profundo conhecimento do mercado de trabalho angolano. Nossa missão é clara: conectar profissionais qualificados às melhores oportunidades de carreira, enquanto ajudamos as empresas a encontrar os talentos que precisam para crescer.
@@ -60,13 +61,13 @@ export default function SobreNos() {
           Nosso trabalho só faz sentido se for um testemunho fiel do seu tempo.
           <svg className="absolute bottom-0 right-0 mb-2 mr-2 text-[#BFF205] h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10.828 6.828a4 4 0 00-5.656-5.656 4 4 0 105.656 5.656zM14.828 10.828a4 4 0 00-5.656-5.656 4 4 0 105.656 5.656z" clipRule="evenodd" /></svg>
         </blockquote>
-        <p className="text-md text-gray-400 text-center">- [Nome da Pessoa], [Cargo]</p> {/* Adjusted text color */}
+        <p className="text-md text-gray-400 text-center">- Gillvany Ferrão, Gestor de Projectos</p> {/* Adjusted text color */}
       </div>
 
       {/* The Team Section */}
       <div className="container mx-auto px-4 md:px-0 py-24 text-center">
         <h2 data-aos="fade-up" className="font-bold text-[50px] tracking-tight text-white mb-8"> {/* Adjusted text color */}
-          THE TEAM.
+          A EQUIPE.
         </h2>
         <p data-aos="fade-up" className="text-lg text-[#D7D7D7]/70 max-w-2xl mx-auto mb-12"> {/* Adjusted text color */}
           Somos uma equipe apaixonada e diversificada, unida pelo objetivo de transformar o cenário de recrutamento em Angola. Acreditamos na colaboração, na inovação e no poder de criar soluções que realmente fazem a diferença na vida das pessoas e no sucesso das empresas.
