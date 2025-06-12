@@ -19,7 +19,7 @@ export default function HomeEmpresa() {
     <div className="min-h-screen w-full bg-[#060B0D] text-white">
       <NavBarEmpresa />
       
-      {/* Hero Section com Layout Diferente */}
+   
       <section className="relative min-h-screen flex items-center justify-between px-20 pt-20">
         <div className="blur bg-[#4A5D23] w-[20rem] h-[20rem] absolute top-10 left-10"></div>
         
@@ -300,7 +300,7 @@ export default function HomeEmpresa() {
               Começar Teste Grátis
             </button>
             <button className="border-2 border-white text-white px-12 py-4 rounded-lg font-semibold text-lg  hover:border-white/50 transition">
-              Agendar Demo
+              Assinar pacote
             </button>
           </div>
         </div>

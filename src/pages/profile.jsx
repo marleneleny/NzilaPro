@@ -15,6 +15,7 @@ import {
   Check,
   AlertCircle,
   RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 import {
   uploadDocument,
@@ -23,19 +24,44 @@ import {
 } from "../services/cloudinary"; 
 import { useNavigate } from "react-router-dom";
 
+// Função para extrair área de atuação do CV
+const extractAreaFromCV = (fileName) => {
+  // Sua lógica de extração aqui
+  return "Área detectada";
+};
+
+const extractFocusFromCV = (fileName, content, area) => {
+  // Sua lógica de extração aqui
+  return "Foco detectado";
+};
+
+// Funções de localStorage
+const saveCVToStorage = (cvData) => {
+  localStorage.setItem('userCV', JSON.stringify(cvData));
+};
+
+const removeCVFromStorage = () => {
+  localStorage.removeItem('userCV');
+};
+
+// ========================================
+// COMPONENTE PRINCIPAL PROFILE
+// ========================================
+
 const CVUploadModal = ({ isOpen, onClose, onSave }) => {
   const [file, setFile] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Função melhorada para validar se é um CV válido
   const validateCV = async (file) => {
     setIsValidating(true);
     setValidationResult(null);
+
 
     // Simular processo de validação
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -78,70 +104,18 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     // 1. PRIMEIRA VERIFICAÇÃO: Indicadores NEGATIVOS CRÍTICOS (rejeição automática)
     const criticalNegativeIndicators = [
       // Livros e literatura
-      "livro",
-      "book",
-      "ebook",
-      "romance",
-      "historia",
-      "história",
-      "contos",
-      "conto",
-      "sonhos",
-      "disciplina",
-      "desenvolvimento pessoal",
-      "autoajuda",
-      "auto-ajuda",
-      "motivação",
-      "motivacao",
-      "inspiração",
-      "inspiracao",
-      "reflexões",
-      "reflexoes",
-      "pensamentos",
-      "filosofia",
-      "espiritualidade",
-
+      "livro", "book", "ebook", "romance", "historia", "história", "contos", "conto", "sonhos", 
+      "disciplina", "desenvolvimento pessoal", "autoajuda", "auto-ajuda", "motivação", "motivacao",
+      "inspiração", "inspiracao", "reflexões", "reflexoes", "pensamentos", "filosofia", "espiritualidade",
       // Documentos acadêmicos/técnicos (exceto tese/dissertação que podem ser parte do CV)
-      "manual",
-      "tutorial",
-      "artigo",
-      "article",
-      "paper",
-      "monografia",
-      "pesquisa",
-      "estudo",
-
+      "manual", "tutorial", "artigo", "article", "paper", "monografia", "pesquisa", "estudo",
       // Documentos comerciais
-      "relatório",
-      "relatorio",
-      "report",
-      "apresentação",
-      "apresentacao",
-      "slides",
-      "powerpoint",
-      "ppt",
-      "planilha",
-      "excel",
-      "contrato",
-      "contract",
-      "invoice",
-      "fatura",
-      "receipt",
-      "comprovante",
-      "catalogo",
-      "catálogo",
-
+      "relatório", "relatorio", "report", "apresentação", "apresentacao", "slides", "powerpoint", "ppt",
+      "planilha", "excel", "contrato", "contract", "invoice", "fatura", "receipt", "comprovante",
+      "catalogo", "catálogo",
       // Mídia e entretenimento
-      "revista",
-      "magazine",
-      "brochure",
-      "folheto",
-      "panfleto",
-      "guia",
-      "receitas",
-      "cookbook",
-      "cardápio",
-      "cardapio",
+      "revista", "magazine", "brochure", "folheto", "panfleto", "guia", "receitas", "cookbook",
+      "cardápio", "cardapio",
     ];
 
     const hasCriticalNegative = criticalNegativeIndicators.some((indicator) =>
@@ -162,77 +136,24 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
 
     // 2. INDICADORES POSITIVOS FORTES (alta confiança de ser CV)
     const strongCVIndicators = [
-      "cv",
-      "curriculo",
-      "currículo",
-      "resume",
-      "curriculum",
+      "cv", "curriculo", "currículo", "resume", "curriculum",
     ];
 
     // 3. INDICADORES POSITIVOS MODERADOS (profissionais e técnicos)
     const moderateCVIndicators = [
-      "profissional",
-      "professional",
-      "experiencia",
-      "experiência",
-      "experience",
-      "qualificacao",
-      "qualificação",
-      "qualification",
-      "habilidades",
-      "skills",
-      "competencias",
-      "competências",
-      "carreira",
-      "career",
-
+      "profissional", "professional", "experiencia", "experiência", "experience",
+      "qualificacao", "qualificação", "qualification", "habilidades", "skills",
+      "competencias", "competências", "carreira", "career",
       // Áreas técnicas e profissionais
-      "frontend",
-      "backend",
-      "fullstack",
-      "developer",
-      "programador",
-      "analista",
-      "engenheiro",
-      "designer",
-      "marketing",
-      "vendas",
-      "gestao",
-      "gestão",
-      "administrador",
-      "coordenador",
-      "gerente",
-      "supervisor",
-      "diretor",
-
+      "frontend", "backend", "fullstack", "developer", "programador", "analista",
+      "engenheiro", "designer", "marketing", "vendas", "gestao", "gestão",
+      "administrador", "coordenador", "gerente", "supervisor", "diretor",
       // Áreas específicas
-      "ti",
-      "rh",
-      "financeiro",
-      "comercial",
-      "administrativo",
-      "juridico",
-      "jurídico",
-      "contabil",
-      "contábil",
-      "educacao",
-      "educação",
-      "saude",
-      "saúde",
-
+      "ti", "rh", "financeiro", "comercial", "administrativo", "juridico", "jurídico",
+      "contabil", "contábil", "educacao", "educação", "saude", "saúde",
       // Formação acadêmica comum em CVs
-      "formacao",
-      "formação",
-      "educacao",
-      "educação",
-      "diploma",
-      "certificado",
-      "tese",
-      "thesis",
-      "dissertação",
-      "dissertacao",
-      "mestrado",
-      "doutorado",
+      "formacao", "formação", "educacao", "educação", "diploma", "certificado",
+      "tese", "thesis", "dissertação", "dissertacao", "mestrado", "doutorado",
     ];
 
     // Verificar indicadores fortes de CV
@@ -240,7 +161,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       fileName.includes(indicator)
     );
     if (hasStrongCV) {
-      cvScore += 60; // Aumentado de 50 para 60
+      cvScore += 60;
       hasPositiveIndicator = true;
     }
 
@@ -249,7 +170,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       fileName.includes(indicator)
     );
     if (hasModerateCV) {
-      cvScore += 30; // Aumentado de 25 para 30
+      cvScore += 30;
       hasPositiveIndicator = true;
     }
 
@@ -257,7 +178,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     const namePattern =
       /\b[a-z]{2,}\s+[a-z]{2,}|[a-z]+_[a-z]+(?:_cv|_curriculo|_resume)?|(?:cv|curriculo|resume)_[a-z]+/i;
     if (namePattern.test(fileName)) {
-      cvScore += 25; // Aumentado de 20 para 25
+      cvScore += 25;
       hasPositiveIndicator = true;
     }
 
@@ -267,7 +188,6 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       const possiblePersonalName =
         /^[a-z]+(?:[-_\s][a-z]+)*\.(?:pdf|docx?|doc)$/i.test(fileName);
       if (possiblePersonalName && Math.random() > 0.5) {
-        // 50% de chance
         cvScore += 15;
         hasPositiveIndicator = true;
       } else {
@@ -281,84 +201,58 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       }
     }
 
-    // 6. Nomes muito genéricos são suspeitos (penalização reduzida)
+    // 6. Nomes muito genéricos são suspeitos
     const genericNames = [
-      "documento",
-      "document",
-      "arquivo",
-      "file",
-      "texto",
-      "text",
-      "untitled",
-      "sem titulo",
-      "novo",
-      "new",
-      "temp",
-      "temporario",
-      "download",
-      "anexo",
-      "attachment",
+      "documento", "document", "arquivo", "file", "texto", "text", "untitled",
+      "sem titulo", "novo", "new", "temp", "temporario", "download", "anexo", "attachment",
     ];
     const hasGenericName = genericNames.some((generic) =>
       fileName.includes(generic)
     );
     if (hasGenericName) {
-      cvScore -= 20; // Reduzido de 30 para 20
+      cvScore -= 20;
       rejectionReasons.push("Nome muito genérico para um CV");
     }
 
     // 7. Análise de tamanho mais flexível
     if (fileSize < 20 * 1024) {
-      // Reduzido de 30KB para 20KB
-      cvScore -= 30; // Reduzido de 40 para 30
+      cvScore -= 30;
       rejectionReasons.push("Arquivo muito pequeno para um CV (menos de 20KB)");
     } else if (fileSize >= 20 * 1024 && fileSize <= 3 * 1024 * 1024) {
-      // Aumentado limite para 3MB
-      cvScore += 20; // Aumentado de 15 para 20
+      cvScore += 20;
     } else if (fileSize > 3 * 1024 * 1024) {
-      cvScore -= 15; // Reduzido de 25 para 15
-      rejectionReasons.push(
-        "Arquivo muito grande para um CV típico (mais de 3MB)"
-      );
+      cvScore -= 15;
+      rejectionReasons.push("Arquivo muito grande para um CV típico (mais de 3MB)");
     }
 
-    // 8. Extensões inadequadas (penalização reduzida)
+    // 8. Extensões inadequadas
     if (fileName.endsWith(".txt")) {
-      cvScore -= 30; // Reduzido de 40 para 30
+      cvScore -= 30;
       rejectionReasons.push("Formato .txt é inadequado para CV profissional");
     }
 
-    // DECISÃO FINAL com critérios mais flexíveis
+    // DECISÃO FINAL
     let isLikelyCV = false;
     let validationMessage = "";
 
     console.log(`Score do arquivo "${fileName}": ${cvScore}`);
 
     if (cvScore >= 35) {
-      // Reduzido de 40 para 35
       isLikelyCV = true;
-      validationMessage =
-        "Currículo válido! Documento identificado como CV profissional.";
+      validationMessage = "Currículo válido! Documento identificado como CV profissional.";
     } else if (cvScore >= 15 && hasPositiveIndicator) {
-      // Reduzido de 20 para 15
-      // Zona de incerteza - mais permissiva
       if (Math.random() > 0.3) {
-        // 70% chance de aceitar (era 40%)
         isLikelyCV = true;
-        validationMessage =
-          "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
+        validationMessage = "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
       } else {
         isLikelyCV = false;
-        validationMessage =
-          "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
+        validationMessage = "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
       }
     } else {
-      // Rejeição
       isLikelyCV = false;
-      const reasons =
-        rejectionReasons.length > 0
-          ? rejectionReasons.join(". ")
-          : "Arquivo não identificado como currículo profissional";
+      const reasons = rejectionReasons.length > 0
+        ? rejectionReasons.join(". ")
+        : "Arquivo não identificado como currículo profissional";
       validationMessage = `${reasons}. Por favor, envie um arquivo com nome indicativo de CV (ex: MeuCV.pdf, Curriculo_Nome.pdf).`;
     }
 
@@ -375,7 +269,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setValidationResult(null);
     setUploadProgress(0);
 
-    // Simular upload
+    // Simular upload visual
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 100) {
@@ -411,7 +305,36 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     if (validationResult?.isValid && file) {
       setIsSaving(true);
       try {
-        await onSave(file);
+        console.log("Iniciando upload do CV:", file.name);
+        
+        // Upload real para Cloudinary
+        const uploadedCV = await uploadDocument(file);
+        console.log("CV uploaded para Cloudinary:", uploadedCV);
+        
+        // Extrair área e foco
+        const detectedArea = extractAreaFromCV(file.name);
+        const detectedFocus = extractFocusFromCV(file.name, "", detectedArea);
+        
+        // Preparar dados do CV
+        const cvData = {
+          fileName: file.name,
+          url: uploadedCV.secure_url,
+          publicId: uploadedCV.public_id,
+          area: detectedArea,
+          focus: detectedFocus,
+          uploadDate: new Date().toISOString(),
+          fileSize: file.size,
+          fileType: file.type
+        };
+        
+        console.log("Dados do CV preparados:", cvData);
+        
+        // Chamar função de save do componente pai
+        await onSave(cvData);
+        
+      } catch (error) {
+        console.error("Erro ao fazer upload do CV:", error);
+        alert("Erro ao fazer upload do currículo. Verifique sua conexão e tente novamente.");
       } finally {
         setIsSaving(false);
       }
@@ -423,11 +346,12 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setValidationResult(null);
     setUploadProgress(0);
     setIsValidating(false);
-    setIsSaving(false); // Adicione esta linha
+    setIsSaving(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+  
   const handleClose = () => {
     resetModal();
     onClose();
@@ -452,7 +376,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
 
         <p className="text-gray-600 mb-6 text-sm">
           Para acessar as candidaturas, primeiro você precisa enviar seu
-          currículo.
+          currículo. Iremos analisar automaticamente sua área de atuação.
         </p>
 
         {/* Área de Upload */}
@@ -518,7 +442,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
             <div className="flex items-center space-x-2">
               <div className="animate-spin w-4 h-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
               <span className="text-sm text-yellow-800">
-                Validando currículo...
+                Analisando currículo e identificando área de atuação...
               </span>
             </div>
           </div>
@@ -581,81 +505,14 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
-// Modal de confirmação para remoção de CV - Adicione este componente no seu Profile.jsx
-const CVDeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null;
+// Modal de confirmação para remoção de CV
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-        {/* Ícone de alerta */}
-        <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">!</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Título */}
-        <h2 className="text-xl font-semibold text-gray-800 text-center mb-2">
-          Remover currículo
-        </h2>
-
-        {/* Mensagem de confirmação */}
-        <div className="text-center mb-6">
-          <p className="text-gray-600 mb-4">
-            Tem certeza que deseja remover este currículo?
-          </p>
-
-          {/* Aviso sobre consequências */}
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-left">
-            <div className="flex items-start">
-              <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center mt-0.5 mr-3 flex-shrink-0">
-                <span className="text-white text-xs font-bold">!</span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-orange-800 mb-2">Atenção!</h3>
-                <p className="text-sm text-orange-700 mb-2">
-                  Ao remover seu currículo:
-                </p>
-                <ul className="text-sm text-orange-700 space-y-1">
-                  <li>• Terá que fazer o teste em vídeo novamente</li>
-                  <li>• Todas as informações do teste serão apagadas</li>
-                  <li>• Suas candidaturas podem ser afetadas</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-500 mt-4">
-            Esta ação não pode ser desfeita.
-          </p>
-        </div>
-
-        <div className="flex space-x-3">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors font-medium"
-          >
-            Remover
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default function Profile() {
+const Profile = () => {
   const { User, SetUser } = useAuth();
   const [cvUploadLoading, setCvUploadLoading] = useState(false);
   const [cvSaveLoading, setCvSaveLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     fullName: User?.name || User?.displayName || "",
@@ -665,67 +522,349 @@ export default function Profile() {
     accountType: User?.accountType || "",
     contact: User?.contact || "",
     about: User?.about || "",
+    portifolio: User?.portifolio || "",
   });
+
   const [loading, setLoading] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false); // Loading específico para imagem
-  const [previewImage, setPreviewImage] = useState(null); // Para preview da imagem
-  const [userCV, setUserCV] = useState(null); // Estado para o CV
-  const [showUploadModal, setShowUploadModal] = useState(false); // Modal de upload
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // Modal de confirmação para mudança de CV
+  const [imageLoading, setImageLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [userCV, setUserCV] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-
-
-    const defaultAvatar =
+  const defaultAvatar =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999999'%3E%3Cpath d='M12 4c1.93 0 3.5 1.57 3.5 3.5S13.93 11 12 11s-3.5-1.57-3.5-3.5S10.07 4 12 4zm0 9c2.67 0 8 1.34 8 4v1H4v-1c0-2.66 5.33-4 8-4z'/%3E%3C/svg%3E";
 
-  // ADICIONE A FUNÇÃO getUserAvatar AQUI
+  // ========================================
+  // FUNÇÃO AUXILIAR PARA VERIFICAR AUTENTICAÇÃO
+  // ========================================
+  const isAuthenticated = () => {
+    console.log("Verificando autenticação:", {
+      User: !!User,
+      uid: User?.uid,
+      id: User?.id,
+      email: User?.email
+    });
+    
+    return User && (User.uid || User.id);
+  };
+
+  const getUserId = () => {
+    return User?.uid || User?.id;
+  };
+
+  // ========================================
+  // CARREGAMENTO INICIAL DOS DADOS
+  // ========================================
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (User && getUserId()) {
+        try {
+          const userRef = doc(db, "users", getUserId());
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setFormData({
+              fullName: userData.fullName || User.displayName || "",
+              email: userData.email || User.email || "",
+              area: userData.area || "",
+              specialization: userData.specialization || "",
+              accountType: userData.accountType || "",
+              contact: userData.contact || "",
+              about: userData.about || "",
+              portifolio: userData.portifolio || "",
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados do usuário:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [User]);
+
+  // FUNÇÕES DE VALIDAÇÃO
+  const validateUrl = (url) => {
+    if (!url) return true;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // ========================================
+  // FUNÇÕES PARA MANIPULAÇÃO DO CV
+  // ========================================
+  const loadCVFromStorage = () => {
+    try {
+      const userId = getUserId();
+      
+      if (userId) {
+        const userSpecificCV = localStorage.getItem(`userCV_${userId}`);
+        if (userSpecificCV) {
+          console.log("CV carregado do localStorage (específico):", userSpecificCV);
+          return JSON.parse(userSpecificCV);
+        }
+      }
+      
+      const storedCV = localStorage.getItem("userCV");
+      if (storedCV) {
+        console.log("CV carregado do localStorage (geral):", storedCV);
+        return JSON.parse(storedCV);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar CV do localStorage:", error);
+    }
+    return null;
+  };
+
+  const saveCVToStorage = (cvData) => {
+    try {
+      const userId = getUserId();
+      if (userId && cvData) {
+        const dataToSave = {
+          fileName: cvData.fileName || cvData.name,
+          url: cvData.url,
+          publicId: cvData.publicId,
+          area: cvData.area,
+          focus: cvData.focus,
+          uploadDate: cvData.uploadDate,
+          fileSize: cvData.fileSize || cvData.size,
+          fileType: cvData.fileType || cvData.type
+        };
+        
+        localStorage.setItem(`userCV_${userId}`, JSON.stringify(dataToSave));
+        localStorage.setItem("userCV", JSON.stringify(dataToSave));
+        console.log("Metadados do CV salvos no localStorage:", dataToSave);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar CV no localStorage:", error);
+    }
+  };
+
+  const removeCVFromStorage = () => {
+    try {
+      const userId = getUserId();
+      
+      if (userId) {
+        localStorage.removeItem(`userCV_${userId}`);
+      }
+      
+      localStorage.removeItem("userCV");
+      console.log("CV removido do localStorage");
+    } catch (error) {
+      console.error("Erro ao remover CV do localStorage:", error);
+    }
+  };
+
+  const handleDownloadCV = async () => {
+    if (userCV?.url) {
+      try {
+        const response = await fetch(userCV.url);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = userCV.fileName || userCV.name || 'curriculo.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Erro ao baixar CV:', error);
+        alert('Erro ao baixar currículo. Tente visualizar online.');
+      }
+    } else {
+      alert("URL do currículo não encontrada.");
+    }
+  };
+
+  const handleCVSave = async (cvDataOrFile) => {
+    if (!isAuthenticated()) {
+      alert("Usuário não autenticado para upload de CV. Por favor, faça login.");
+      return;
+    }
+
+    try {
+      setCvSaveLoading(true);
+      let cvData;
+
+      // Se recebeu um arquivo, fazer upload
+      if (cvDataOrFile instanceof File) {
+        const userId = getUserId();
+        const uploadResult = await uploadDocument(cvDataOrFile, userId);
+
+        cvData = {
+          fileName: uploadResult.originalName,
+          name: uploadResult.originalName,
+          size: uploadResult.size,
+          type: cvDataOrFile.type,
+          uploadDate: new Date().toISOString(),
+          url: uploadResult.url,
+          publicId: uploadResult.publicId,
+        };
+      } else {
+        // Se recebeu dados do CV já processados
+        cvData = cvDataOrFile;
+      }
+      
+      // Salvar no Firestore
+      const userId = getUserId();
+      if (userId) {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          cvData: cvData,
+          area: cvData.area || formData.area,
+          specialization: cvData.focus || formData.specialization,
+          updatedAt: new Date()
+        });
+      }
+      
+      // Salvar no localStorage
+      saveCVToStorage(cvData);
+      setUserCV(cvData);
+      
+      // Atualizar contexto do usuário
+      SetUser(prev => ({
+        ...prev,
+        cvData: cvData,
+        area: cvData.area || prev.area,
+        specialization: cvData.focus || prev.specialization
+      }));
+      
+      setShowUploadModal(false);
+      alert("Currículo salvo com sucesso!");
+      console.log("CV salvo com sucesso:", cvData);
+      
+    } catch (error) {
+      console.error("Erro ao salvar CV:", error);
+      alert("Erro ao salvar currículo. Tente novamente.");
+    } finally {
+      setCvSaveLoading(false);
+    }
+  };
+
+  const handleRemoveCV = async () => {
+    if (!isAuthenticated()) {
+      alert("Usuário não autenticado. Por favor, faça login.");
+      return;
+    }
+
+    try {
+      setCvUploadLoading(true);
+      
+      // Remover do Cloudinary
+      if (userCV?.publicId) {
+        try {
+          await deleteDocument(userCV.publicId);
+          console.log("CV removido do Cloudinary");
+        } catch (cloudinaryError) {
+          console.warn("Erro ao remover do Cloudinary:", cloudinaryError);
+        }
+      }
+      
+      // Remover do Firestore
+      const userId = getUserId();
+      if (userId) {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          cvData: null,
+          area: "",
+          specialization: "",
+          testData: null,
+          testCompleted: false,
+          videoTestCompleted: false,
+          updatedAt: new Date()
+        });
+      }
+      
+      // Remover do localStorage
+      removeCVFromStorage();
+      setUserCV(null);
+      setShowDeleteConfirmation(false);
+      
+      // Atualizar contexto
+      SetUser(prev => ({
+        ...prev,
+        cvData: null,
+        area: "",
+        specialization: "",
+        testData: null,
+        testCompleted: false,
+        videoTestCompleted: false,
+      }));
+      
+      alert("Currículo removido com sucesso! Você precisará refazer o teste em vídeo.");
+      console.log("CV removido com sucesso");
+    } catch (error) {
+      console.error("Erro ao remover CV:", error);
+      alert("Erro ao remover currículo. Tente novamente.");
+    } finally {
+      setCvUploadLoading(false);
+    }
+  };
+
+  // ========================================
+  // FUNÇÕES PARA MANIPULAÇÃO DO AVATAR
+  // ========================================
+  const loadAvatarFromStorage = () => {
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const storedAvatar = localStorage.getItem(`userAvatar_${userId}`);
+        if (storedAvatar) {
+          console.log("Avatar carregado do localStorage:", storedAvatar);
+          return storedAvatar;
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar avatar do localStorage:", error);
+    }
+    return null;
+  };
+
+  const saveAvatarToStorage = (avatarUrl) => {
+    try {
+      const userId = getUserId();
+      if (userId && avatarUrl) {
+        localStorage.setItem(`userAvatar_${userId}`, avatarUrl);
+        console.log("Avatar salvo no localStorage:", avatarUrl);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar avatar no localStorage:", error);
+    }
+  };
+
   const getUserAvatar = () => {
-    // 1. Se há preview de imagem (durante upload), mostrar preview
     if (previewImage) {
       return previewImage;
     }
 
-    // 2. Se o usuário tem avatar no contexto, usar esse
     if (User?.avatar) {
       return User.avatar;
     }
 
-    // 3. Tentar carregar avatar do localStorage
     const storedAvatar = loadAvatarFromStorage();
     if (storedAvatar) {
       return storedAvatar;
     }
 
-    // 4. Se o usuário tem photoURL (Google/Firebase), usar esse
     if (User?.photoURL) {
       return User.photoURL;
     }
 
-    // 5. Fallback para avatar padrão
     return defaultAvatar;
   };
-   
 
-  // Carregar CV do localStorage quando componente monta
-  useEffect(() => {
-    const savedCV = localStorage.getItem("userCV");
-    if (savedCV) {
-      const cvData = JSON.parse(savedCV);
-      setUserCV(cvData);
-
-      // NOVO: Sincronizar com o contexto do usuário se ainda não estiver lá
-      if (User && !User.cvData) {
-        SetUser((prev) => ({
-          ...prev,
-          cvData: cvData,
-        }));
-      }
-    }
-  }, [User, SetUser]);
-
-  // Opções de especialização/foco baseadas na área de atuação (SEM ALTERAÇÃO NA LÓGICA DE SELECIONAR)
+  // ========================================
+  // OPÇÕES DE ESPECIALIZAÇÃO
+  // ========================================
   const getFocusOptions = () => {
     switch (formData.area) {
       case "Tecnologia":
@@ -740,10 +879,7 @@ export default function Profile() {
           { value: "Cybersecurity", label: "Cybersecurity" },
           { value: "DevOps", label: "DevOps" },
           { value: "UX/UI Design", label: "UX/UI Design" },
-          {
-            value: "Inteligência Artificial",
-            label: "Inteligência Artificial",
-          },
+          { value: "Inteligência Artificial", label: "Inteligência Artificial" },
           { value: "Cloud Computing", label: "Cloud Computing" },
           { value: "Análise de Sistemas", label: "Análise de Sistemas" },
           { value: "Gestão de TI", label: "Gestão de TI" },
@@ -776,339 +912,263 @@ export default function Profile() {
           { value: "Perícia Contábil", label: "Perícia Contábil" },
           { value: "Consultoria Tributária", label: "Consultoria Tributária" },
           { value: "Contabilidade Pública", label: "Contabilidade Pública" },
-          {
-            value: "Contabilidade Gerencial",
-            label: "Contabilidade Gerencial",
-          },
+          { value: "Contabilidade Gerencial", label: "Contabilidade Gerencial" },
           { value: "Análise Financeira", label: "Análise Financeira" },
-          {
-            value: "Planejamento Tributário",
-            label: "Planejamento Tributário",
-          },
+          { value: "Planejamento Tributário", label: "Planejamento Tributário" },
         ];
       default:
         return [{ value: "", label: "Selecione primeiro uma área de atuação" }];
     }
   };
 
-  const loadAvatarFromStorage = () => {
-  try {
-    const userId = User?.id || User?.uid;
-    if (userId) {
-      const storedAvatar = localStorage.getItem(`userAvatar_${userId}`);
-      if (storedAvatar) {
-        console.log("Avatar carregado do localStorage:", storedAvatar);
-        return storedAvatar;
-      }
-    }
-  } catch (error) {
-    console.error("Erro ao carregar avatar do localStorage:", error);
-  }
-  return null;
-};
-
-const saveAvatarToStorage = (avatarUrl) => {
-  try {
-    const userId = User?.id || User?.uid;
-    if (userId && avatarUrl) {
-      localStorage.setItem(`userAvatar_${userId}`, avatarUrl);
-      console.log("Avatar salvo no localStorage:", avatarUrl);
-    }
-  } catch (error) {
-    console.error("Erro ao salvar avatar no localStorage:", error);
-  }
-};
-
-useEffect(() => {
-  const loadUserData = async () => {
-    if (User && (User.id || User.uid)) {
-      try {
-        const userId = User.id || User.uid;
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          
-          // Se há avatar no Firestore, atualizar contexto e localStorage
-          if (userData.avatar && userData.avatar !== User.avatar) {
-            SetUser(prev => ({
-              ...prev,
-              avatar: userData.avatar,
-            }));
-            saveAvatarToStorage(userData.avatar);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados do usuário:", error);
-      }
-    }
-  };
-
-  loadUserData();
-}, [User?.id, User?.uid]);
-
-
-  const isAuthenticated = () => {
-    return User && User.uid;
-  };
-
+  // ========================================
+  // HANDLERS DE EVENTOS
+  // ========================================
   const handleClickImage = () => {
     if (!imageLoading) {
       fileInputRef.current.click();
     }
   };
 
-  // handleInputChange - SEM ALTERAÇÃO DE LÓGICA CONFORME SOLICITADO
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-const handleImageChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // Validações...
-  if (!User || (!User.id && !User.uid)) {
-    alert("Usuário não autenticado. Por favor, faça login para atualizar a foto de perfil.");
-    return;
-  }
-
-  setImageLoading(true);
-
-  try {
-    // Converter para base64
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Image = e.target.result;
-      
-      try {
-        const userId = User.id || User.uid;
-        
-        // Salvar no Firestore
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          avatar: base64Image,
-        });
-
-        // Salvar no localStorage
-        saveAvatarToStorage(base64Image);
-
-        // Atualizar contexto
-        SetUser((prev) => ({
-          ...prev,
-          avatar: base64Image,
-        }));
-
-        alert("Foto de perfil atualizada com sucesso!");
-
-      } catch (error) {
-        console.error("Erro ao salvar no Firestore:", error);
-        alert("Erro ao salvar foto. Tente novamente.");
-      } finally {
-        setImageLoading(false);
-      }
-    };
-    
-    reader.readAsDataURL(file);
-
-  } catch (error) {
-    console.error("Erro ao processar imagem:", error);
-    alert("Erro ao processar imagem. Tente novamente.");
-    setImageLoading(false);
-  } finally {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }
-};
-
-const handleSave = async () => {
-  if (!User || (!User.id && !User.uid)) {
-    alert("Usuário não autenticado. Por favor, faça login para salvar as alterações.");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const userId = User.id || User.uid;
-
-    // Preparar dados para atualizar
-    const updateData = {
-      fullName: formData.fullName,
-      email: formData.email,
-      area: formData.area,
-      specialization: formData.specialization,
-      accountType: formData.accountType,
-      contact: formData.contact,
-      about: formData.about,
-    };
-
-    // IMPORTANTE: Incluir avatar atual se existir
-    if (User.avatar) {
-      updateData.avatar = User.avatar;
-    }
-
-    // Se existe CV no estado, incluir nos dados
-    if (userCV) {
-      updateData.cvData = userCV;
-    }
-
-    // Update user document in Firestore
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, updateData);
-
-    // Update user context
-    SetUser((prev) => ({
-      ...prev,
-      name: formData.fullName,
-      email: formData.email,
-      area: formData.area,
-      specialization: formData.specialization,
-      accountType: formData.accountType,
-      contact: formData.contact,
-      about: formData.about,
-      cvData: userCV,
-    }));
-
-    alert("Perfil atualizado com sucesso!");
-    // Remover o window.location.reload() para evitar perder o estado
-    
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    alert("Erro ao atualizar perfil. Tente novamente.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-// 6. ADICIONAR função para debug (temporária)
-const debugAvatarState = () => {
-  console.log("=== DEBUG AVATAR STATE ===");
-  console.log("User.avatar:", User?.avatar);
-  console.log("User.photoURL:", User?.photoURL);
-  console.log("localStorage avatar:", loadAvatarFromStorage());
-  console.log("previewImage:", previewImage);
-  console.log("Current getUserAvatar():", getUserAvatar());
-  console.log("========================");
-};
-
-  const handleRemoveCVSimple = () => {
-    setShowDeleteConfirmation(true);
-  };
-
-  const confirmRemoveCV = async () => {
-    setShowDeleteConfirmation(false);
-    setCvUploadLoading(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      localStorage.removeItem("userCV");
-      setUserCV(null);
-
-      if (User && (User.id || User.uid)) {
-        const userId = User.id || User.uid;
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          cvData: null,
-          testData: null,
-          testCompleted: false,
-          videoTestCompleted: false,
-        });
-
-        SetUser((prev) => ({
-          ...prev,
-          cvData: null,
-          testData: null,
-          testCompleted: false,
-          videoTestCompleted: false,
-        }));
-      }
-
-      alert(
-        "Currículo removido com sucesso! Você precisará refazer o teste em vídeo."
-      );
-    } catch (error) {
-      console.error("Erro ao remover currículo:", error);
-      alert("Erro ao remover currículo. Tente novamente.");
-    } finally {
-      setCvUploadLoading(false);
-    }
-  };
-
-  // Função para formatar data
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Função para formatar tamanho do arquivo
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const handleCVSave = async (file) => {
-    // ADICIONADO: Verificação explícita do User
-    if (!User || (!User.id && !User.uid)) {
-      alert(
-        "Usuário não autenticado para upload de CV. Por favor, faça login."
-      );
+    if (!isAuthenticated()) {
+      alert("Usuário não autenticado. Por favor, faça login para atualizar a foto de perfil.");
       return;
     }
 
-    setCvSaveLoading(true); // NOVO: Ativar loading
+    setImageLoading(true);
 
     try {
-      const userId = User.id || User.uid;
-      const uploadResult = await uploadDocument(file, userId); // Use uploadDocument
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target.result;
+        
+        try {
+          const userId = getUserId();
+          
+          const userRef = doc(db, "users", userId);
+          await updateDoc(userRef, {
+            avatar: base64Image,
+          });
 
-      const cvData = {
-        name: uploadResult.originalName,
-        size: uploadResult.size,
-        type: file.type,
-        uploadDate: new Date().toISOString(),
-        url: uploadResult.url,
-        publicId: uploadResult.publicId,
+          saveAvatarToStorage(base64Image);
+
+          SetUser((prev) => ({
+            ...prev,
+            avatar: base64Image,
+          }));
+
+          alert("Foto de perfil atualizada com sucesso!");
+
+        } catch (error) {
+          console.error("Erro ao salvar no Firestore:", error);
+          alert("Erro ao salvar foto. Tente novamente.");
+        } finally {
+          setImageLoading(false);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+
+    } catch (error) {
+      console.error("Erro ao processar imagem:", error);
+      alert("Erro ao processar imagem. Tente novamente.");
+      setImageLoading(false);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    console.log("Tentativa de salvamento - Estado do usuário:", {
+      User: !!User,
+      uid: User?.uid,
+      id: User?.id,
+      isAuthenticated: isAuthenticated()
+    });
+
+    if (!isAuthenticated()) {
+      alert("Usuário não autenticado. Por favor, faça login para salvar as alterações.");
+      return;
+    }
+
+    // Validações básicas
+    const newErrors = {};
+    
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Nome completo é obrigatório';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email é obrigatório';
+    }
+    
+    if (formData.portifolio && !validateUrl(formData.portifolio)) {
+      newErrors.portifolio = 'URL do portfólio inválida';
+    }
+    
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      alert('Por favor, corrija os erros no formulário antes de salvar.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const userId = getUserId();
+      const userRef = doc(db, "users", userId);
+      
+      const updateData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        area: formData.area,
+        specialization: formData.specialization,
+        accountType: formData.accountType,
+        contact: formData.contact,
+        about: formData.about,
+        portifolio: formData.portifolio,
+        updatedAt: new Date().toISOString()
       };
 
-      localStorage.setItem("userCV", JSON.stringify(cvData));
-      setUserCV(cvData);
-      setShowUploadModal(false);
-      alert("Currículo salvo com sucesso!");
+      console.log("Salvando dados:", updateData);
+      await updateDoc(userRef, updateData);
+
+      // Atualizar o contexto
+      SetUser((prev) => ({
+        ...prev,
+        ...updateData
+      }));
+
+      alert("Perfil atualizado com sucesso!");
+      
     } catch (error) {
-      console.error("Erro ao salvar currículo no Cloudinary:", error);
-      alert("Erro ao salvar currículo. Tente novamente.");
+      console.error("Erro ao atualizar perfil:", error);
+      alert(`Erro ao atualizar perfil: ${error.message}`);
     } finally {
-      setCvSaveLoading(false); // NOVO: Desativar loading
+      setLoading(false);
     }
   };
 
   async function handleLogout() {
-      try {
-        await auth.signOut();
-        navigate("/login", { replace: true });
-         window.location.reload();
-        console.log("User logged out successfully!");
-      } catch (error) {
-        console.error("Error logging out:", error.message);
+    try {
+      await auth.signOut();
+      navigate("/login", { replace: true });
+      window.location.reload();
+      console.log("User logged out successfully!");
+    } catch (error) {
+      console.error("Error logging out:", error.message);
+    }
+  };
+
+  // ========================================
+  // SINCRONIZAÇÃO DE DADOS
+  // ========================================
+  const syncCVData = async () => {
+    if (!isAuthenticated()) return;
+
+    try {
+      const userId = getUserId();
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        
+        if (userData.cvData && !userCV) {
+          saveCVToStorage(userData.cvData);
+          setUserCV(userData.cvData);
+        } else if (userCV && !userData.cvData) {
+          await updateDoc(userRef, {
+            cvData: userCV,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao sincronizar dados do CV:", error);
+    }
+  };
+
+  // ========================================
+  // EFEITOS
+  // ========================================
+  useEffect(() => {
+    const savedCV = loadCVFromStorage();
+    if (savedCV) {
+      setUserCV(savedCV);
+
+      if (User && !User.cvData) {
+        SetUser((prev) => ({
+          ...prev,
+          cvData: savedCV,
+        }));
       }
     }
+  }, [User?.id, User?.uid, SetUser]);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (isAuthenticated()) {
+        try {
+          const userId = getUserId();
+          const userRef = doc(db, "users", userId);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            
+            if (userData.avatar && userData.avatar !== User.avatar) {
+              SetUser(prev => ({
+                ...prev,
+                avatar: userData.avatar,
+              }));
+              saveAvatarToStorage(userData.avatar);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados do usuário:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [User?.id, User?.uid]);
+
+  useEffect(() => {
+    if (isAuthenticated() && userCV) {
+      syncCVData();
+    }
+  }, [User?.id, User?.uid, userCV]);
+
+  const handleViewCV = () => {
+    if (userCV?.url) {
+      window.open(userCV.url, '_blank');
+    } else {
+      alert("URL do currículo não encontrada.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#060B0D] text-white">
@@ -1118,7 +1178,7 @@ const debugAvatarState = () => {
 
       <div className="flex flex-col items-center pt-20 pb-10">
         {/* Profile Image Section */}
-        <div className="flex items-center gap-6  relative bottom-32">
+        <div className="flex items-center gap-6 relative bottom-32">
           <div
             className={`w-36 h-36 bg-gray-600 right-[19rem] rounded-full overflow-hidden cursor-pointer relative ${
               imageLoading ? "opacity-50" : ""
@@ -1152,9 +1212,12 @@ const debugAvatarState = () => {
             </h2>
           </div>
         </div>
-        {/* Logout Button */}
 
-        <button onClick={handleLogout} className="px-8 py-2 bg-red-500 absolute ml-[43rem] bottom-80 rounded-md text-white font-medium hover:bg-red-400">
+        {/* Logout Button */}
+        <button 
+          onClick={handleLogout} 
+          className="px-8 py-2 bg-red-500 absolute ml-[43rem] bottom-80 rounded-md text-white font-medium hover:bg-red-400"
+        >
           Terminar sessão
         </button>
 
@@ -1171,9 +1234,14 @@ const debugAvatarState = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:border-green-500"
+                className={`w-full px-4 py-3 bg-gray-800 border rounded-md focus:outline-none focus:border-green-500 ${
+                  errors.fullName ? 'border-red-500' : 'border-gray-600'
+                }`}
                 placeholder="Seu nome completo"
               />
+              {errors.fullName && (
+                <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+              )}
             </div>
 
             <div>
@@ -1183,9 +1251,14 @@ const debugAvatarState = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:border-green-500"
+                className={`w-full px-4 py-3 bg-gray-800 border rounded-md focus:outline-none focus:border-green-500 ${
+                  errors.email ? 'border-red-500' : 'border-gray-600'
+                }`}
                 placeholder="seu@email.com"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -1196,7 +1269,7 @@ const debugAvatarState = () => {
                 type="text"
                 value={formData.accountType}
                 readOnly
-                className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md  cursor-not-allowed"
+                className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md cursor-not-allowed"
               />
             </div>
           </div>
@@ -1253,16 +1326,63 @@ const debugAvatarState = () => {
           </div>
         </div>
 
-        {/* CV Upload Section - Agora mostra o CV carregado */}
+        {/* Portfolio Section */}
+        <div className="mr-[27rem] mt-8">
+          <label className="block text-sm font-medium mb-2">Link do Portfólio</label>
+          <div className="flex relative">
+            <input
+              type="url"
+              name="portifolio"
+              value={formData.portifolio || ''}
+              onChange={handleInputChange}
+              className={`flex-1 px-4 py-3 bg-gray-800 border rounded-md focus:outline-none focus:border-green-500 ${
+                errors.portifolio ? 'border-red-500' : 'border-gray-600'
+              }`}
+              placeholder="https://meuportfolio.com"
+            />
+            {formData.portifolio && validateUrl(formData.portifolio) && (
+              <a
+                href={formData.portifolio}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute right-3 top-3 text-blue-500 hover:text-blue-700"
+              >
+                <ExternalLink className="h-5 w-5" />
+              </a>
+            )}
+          </div>
+          {errors.portifolio && (
+            <p className="mt-1 text-sm text-red-600">{errors.portifolio}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Opcional: Compartilhe seu portfólio online (ex: GitHub, Behance, site pessoal)
+          </p>
+        </div>
+
+        <div className="w-full max-w-4xl mt-8">
+  <label className="block text-sm font-medium mb-2">Sobre você</label>
+  <textarea
+    name="about"
+    value={formData.about}
+    onChange={handleInputChange}
+    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:border-green-500"
+    placeholder="Conte um pouco sobre você..."
+    rows={4}
+  />
+</div>
+
+        {/* CV Upload Section */}
         <div className="w-full max-w-4xl mt-8">
           <label className="block text-sm font-medium mb-2">Currículo</label>
 
           {/* Loading bar quando fazendo upload/delete */}
-          {cvUploadLoading && (
+          {(cvUploadLoading || cvSaveLoading) && (
             <div className="mb-4 p-4 bg-blue-50 bg-opacity-10 border border-blue-500 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <span className="text-blue-400">Processando currículo...</span>
+                <span className="text-blue-400">
+                  {cvSaveLoading ? "Salvando currículo..." : "Processando currículo..."}
+                </span>
               </div>
               <div className="mt-2 w-full bg-gray-700 rounded-full h-2">
                 <div
@@ -1274,91 +1394,74 @@ const debugAvatarState = () => {
           )}
 
           {userCV ? (
-            // Mostrar CV carregado
-            <div
-              className={`border border-gray-600 rounded-lg p-6 bg-gray-800 ${
-                cvUploadLoading ? "opacity-50" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white">{userCV.name}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-gray-400">
-                      <span>{formatFileSize(userCV.size)}</span>
-                      <span>•</span>
-                      <span>Carregado em: {formatDate(userCV.uploadDate)}</span>
-                    </div>
-                  </div>
+            <div className="flex items-center justify-between bg-gray-700 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <FileText className="text-blue-400" size={24} />
+                <div>
+                  <p className="text-white font-medium">
+                    {userCV.fileName || userCV.name}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Área: {userCV.area || "Não especificada"}
+                    {userCV.focus && ` • ${userCV.focus}`}
+                  </p>
+                  {userCV.uploadDate && (
+                    <p className="text-gray-400 text-xs">
+                      Enviado em: {new Date(userCV.uploadDate).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => window.open(userCV.url, "_blank")}
-                    disabled={cvUploadLoading}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
-                    title="Baixar CV"
-                  >
-                    <Download className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={handleRemoveCVSimple}
-                    disabled={cvUploadLoading}
-                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
-                    title="Remover CV"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              <div className="mt-4 p-3 bg-green-50 bg-opacity-10 rounded-lg">
-                <p className="text-sm text-green-400">
-                  ✓ Currículo carregado com sucesso! Você pode acessar as
-                  candidaturas.
-                </p>
+              </div><div className="flex space-x-2">
+                <button
+                  onClick={handleViewCV}
+                  className="p-2 rounded-full hover:bg-gray-600 transition-colors"
+                  title="Visualizar Currículo"
+                >
+                  <ExternalLink className="text-blue-400" size={20} />
+                </button>
+                <button
+                  onClick={handleDownloadCV}
+                  className="p-2 rounded-full hover:bg-gray-600 transition-colors"
+                  title="Baixar Currículo"
+                >
+                  <Download className="text-green-400" size={20} />
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirmation(true)}
+                  className="p-2 rounded-full hover:bg-gray-600 transition-colors"
+                  title="Remover Currículo"
+                >
+                  <X className="text-red-400" size={20} />
+                </button>
+                <button
+                    onClick={() => setShowUploadModal(true)} // Permite re-upload/atualização
+                    className="p-2 rounded-full hover:bg-gray-600 transition-colors"
+                    title="Atualizar Currículo"
+                >
+                    <RefreshCw className="text-yellow-400" size={20} />
+                </button>
               </div>
             </div>
           ) : (
-            // Mostrar área de upload quando não há CV
-            <div
-              className={`border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:cursor-pointer ${
-                cvUploadLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={() => !cvUploadLoading && setShowUploadModal(true)}
-            >
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-              <p className="text-gray-300 mb-2">
-                <span className="font-medium">Nenhum currículo carregado</span>
+            <div className="flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg border border-dashed border-gray-600 text-center">
+              <p className="text-gray-400 mb-4">
+                Nenhum currículo enviado ainda.
               </p>
-              <p className="text-sm text-gray-500">
-                Vá para Candidaturas e faça o upload do seu CV para acessar as
-                vagas disponíveis.
-              </p>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <Upload size={20} />
+                <span>Enviar Currículo</span>
+              </button>
             </div>
           )}
-        </div>
-
-        {/* About Section */}
-        <div className="w-full max-w-4xl mt-8">
-          <label className="block text-sm font-medium mb-2">Sobre mim</label>
-          <textarea
-            name="about"
-            value={formData.about}
-            onChange={handleInputChange}
-            rows="6"
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:border-green-500 resize-none"
-            placeholder="Fale um pouco sobre você..."
-          />
         </div>
 
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-10 py-2 relative right-96 mt-6  bg-green-500 rounded-md text-black font-medium hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed "
+          className="px-10 py-2 relative right-96 mt-6 bg-green-500 rounded-md text-black font-medium hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed "
         >
           {loading && (
             <div className="w-4 h-4 mt-2 ml-6 absolute border-2 border-black border-t-transparent rounded-full animate-spin"></div>
@@ -1380,11 +1483,39 @@ const debugAvatarState = () => {
         onClose={() => setShowUploadModal(false)}
         onSave={handleCVSave}
       />
-      <CVDeleteConfirmationModal
-        isOpen={showDeleteConfirmation}
-        onClose={() => setShowDeleteConfirmation(false)}
-        onConfirm={confirmRemoveCV}
-      />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm text-center">
+            <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+            <h3 className="text-xl font-bold text-white mb-4">Confirmar Exclusão</h3>
+            <p className="text-gray-300 mb-6">
+              Tem certeza que deseja remover seu currículo? Essa ação não pode ser desfeita e você precisará refazer o teste em vídeo.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowDeleteConfirmation(false)}
+                className="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                disabled={cvUploadLoading}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRemoveCV}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={cvUploadLoading}
+              >
+                {cvUploadLoading ? "Removendo..." : "Remover"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <NzilaFooter />
     </div>
   );
-}
+};
+
+export default Profile;

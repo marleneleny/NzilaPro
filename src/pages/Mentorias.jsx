@@ -174,7 +174,7 @@ export default function NzilaMentoriaSystem() {
       <div className="min-h-screen bg-[#060B0D] text-white font-poppins"> {/* Main font Poppins */}
         <NavBar /> {/* Adicionado NavBar */}
         {/* Header */}
-        <div className="border-b border-[#1C1C1C] px-6 py-8"> {/* Ajustado border-b */}
+        <div className="border-b border-[#1C1C1C] px-6 py-40"> {/* Ajustado border-b */}
           <div className="max-w-7xl mx-auto">
             <button
               onClick={() => setCurrentView('home')}
@@ -372,9 +372,9 @@ export default function NzilaMentoriaSystem() {
       <NavBar /> {/* Adicionado NavBar */}
       {/* Header */}
       <div className="border-b border-[#1C1C1C] px-6 py-8"> {/* Ajustado border-b */}
-        <div className="max-w-7xl mx-auto">
-          <div data-aos="fade-down" className="mb-6">
-            <span className="bg-[#BFF205] text-black px-3 py-1 rounded-full text-sm font-semibold font-poppins"> {/* Font Poppins */}
+        <div className="max-w-7xl ">
+          <div data-aos="fade-down" className="mb-6 mt-40">
+            <span className="bg-[#BFF205]  text-black mt-96 px-3 py-1 rounded-full text-sm font-semibold font-poppins"> {/* Font Poppins */}
               MENTORIAS NZILA
             </span>
           </div>
@@ -434,7 +434,7 @@ export default function NzilaMentoriaSystem() {
           </div>
 
           {/* Mentorias Grid */}
-          <div className="mb-12">
+          <div className="mb-40 mt-40">
             <h2 data-aos="fade-up" className="text-2xl font-bold mb-8 font-poppins">Mentorias Disponíveis</h2> {/* Font Poppins */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {mentorias.map(mentoria => (

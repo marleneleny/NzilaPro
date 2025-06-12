@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../services/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import useAuth from "../hooks/useAuth";
 import logo from "../assets/logo.svg";
@@ -31,7 +31,7 @@ function Formulario() {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState({ message: "", color: "" });
+  const [error, setError] = useState({ message: "", color: "", className: "" });
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {
@@ -62,6 +62,7 @@ function Formulario() {
       setError({
         message: "Por favor, preencha todos os campos.",
         color: "text-red-500",
+        className: "relative",
       });
       return;
     }
@@ -70,6 +71,7 @@ function Formulario() {
       setError({
         message: "Número de telefone inválido. Ex: +2449******** ou 9********",
         color: "text-red-500",
+        className: "relative",
       });
       return;
     }
@@ -78,62 +80,111 @@ function Formulario() {
       setError({
         message: "Você deve aceitar os termos para continuar.",
         color: "text-red-500",
+        className: "relative",
       });
       return;
     }
 
-    setError({ message: "", color: "" });
+    setError({ message: "", color: "", className: "" });
     setStep(2);
   };
 
-  const handleGoogleLogin = async () => {
+  // Função para verificar se email já existe no Firebase Auth
+  const checkEmailExists = async (email) => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-
-      if (result.user) {
-        const { uid, displayName, photoURL, email } = result.user;
-        if (!displayName || !photoURL)
-          throw new Error("O usuário não tem foto ou nome.");
-
-        // Verificar/salvar dados no Firestore
-        const userRef = doc(db, "users", uid);
-        const docSnap = await getDoc(userRef);
-
-        if (!docSnap.exists()) {
-          await setDoc(userRef, {
-            fullName: displayName,
-            avatar: photoURL,
-            email,
-            contact: "",
-            area: "",
-            accountType: "",
-            id: uid
-          });
-        }
-
-        // O AuthContext automaticamente detectará a mudança e redirecionará
-      }
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      return signInMethods.length > 0; // Se retornar array com métodos, email já existe
     } catch (error) {
-      console.error("Erro ao autenticar com Google:", error);
-      setError({
-        message: "Erro ao fazer login com Google. Tente novamente.",
-        color: "text-red-500",
-      });
+      console.error("Erro ao verificar email:", error);
+      return false; // Em caso de erro, permitir continuar
     }
   };
+
+const handleGoogleLogin = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    if (result.user) {
+      const { uid, displayName, photoURL, email } = result.user;
+      if (!displayName || !photoURL)
+        throw new Error("O usuário não tem foto ou nome.");
+
+      // Verificar se o usuário já existe no Firestore usando o UID
+      const userRef = doc(db, "users", uid); // ✅ Usar UID em vez de formData.email
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists()) {
+        // Usuário já existe - fazer login
+        const userData = docSnap.data();
+        
+        // Verificar se precisa completar o cadastro
+        if (!userData.accountType || !userData.area) {
+          setError({
+            message: "Complete seu cadastro selecionando o tipo de conta e área.",
+            color: "text-yellow-500",
+            className: "mb-0",
+          });
+          // O usuário será redirecionado para SelectAccountType pelo useEffect
+          return;
+        }
+        
+        setError({
+          message: "Bem-vindo de volta! Login realizado com sucesso.",
+          color: "text-green-500",
+          className: "mb-0",
+        });
+      } else {
+        // Novo usuário - criar registro no Firestore SEM accountType e area
+        // para que seja redirecionado para SelectAccountType
+        await setDoc(userRef, {
+          fullName: displayName,
+          avatar: photoURL,
+          email,
+          contact: "", // Será preenchido posteriormente se necessário
+          area: "", // Será preenchido no SelectAccountType
+          accountType: "", // Será preenchido no SelectAccountType
+          id: uid
+        });
+        
+        setError({
+          message: "Conta criada! Complete seu cadastro.",
+          color: "text-green-500",
+          className: "mb-0",
+        });
+      }
+
+      // O AuthContext automaticamente detectará a mudança e redirecionará
+    }
+  } catch (error) {
+    console.error("Erro ao autenticar com Google:", error);
+    setError({
+      message: "Erro ao fazer login com Google. Tente novamente.",
+      color: "text-red-500",
+      className: "mb-0",
+    });
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setError({ message: "Preencha todos os campos.", color: "text-red-500" });
+      setError({ 
+        message: "Preencha todos os campos.", 
+        color: "text-red-500",
+        className: "mb-0"
+      });
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError({ message: "Email inválido.", color: "text-red-500" });
+      setError({ 
+        message: "Email inválido.", 
+        color: "text-red-500",
+        className: "mb-0"
+      });
       return;
     }
 
@@ -141,16 +192,34 @@ function Formulario() {
       setError({
         message: "A senha deve ter pelo menos 6 caracteres.",
         color: "text-red-500",
+        className: "mb-0",
       });
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError({ message: "As senhas não coincidem.", color: "text-red-500" });
+      setError({ 
+        message: "As senhas não coincidem.", 
+        color: "text-red-500",
+        className: "mb-0"
+      });
       return;
     }
 
     try {
+      // Verificar se o email já existe no sistema
+      const emailExists = await checkEmailExists(formData.email);
+      
+      if (emailExists) {
+        setError({ 
+          message: "Este email já está cadastrado no nosso sistema. Faça login ou use outro email.", 
+          color: "text-red-500",
+          className: "mb-0"
+        });
+        return;
+      }
+
+      // Se o email não existe, criar a conta
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -175,26 +244,30 @@ function Formulario() {
     } catch (err) {
       console.error("Erro ao cadastrar:", err.message);
       
-      // Verificar se é erro de email já existente
+      // Verificar se é erro de email já existente (dupla proteção)
       if (err.code === 'auth/email-already-in-use') {
         setError({ 
-          message: "Este email já está cadastrado. Tente fazer login ou use outro email.", 
-          color: "text-red-500" 
+          message: "Este email já está cadastrado. Faça login ou use outro email.", 
+          color: "text-red-500",
+          className: "mb-0"
         });
       } else if (err.code === 'auth/weak-password') {
         setError({ 
           message: "A senha é muito fraca. Use pelo menos 6 caracteres.", 
-          color: "text-red-500" 
+          color: "text-red-500",
+          className: "relative"
         });
       } else if (err.code === 'auth/invalid-email') {
         setError({ 
           message: "Email inválido.", 
-          color: "text-red-500" 
+          color: "text-red-500",
+          className: "mb-0"
         });
       } else {
         setError({ 
           message: "Erro ao criar conta. Tente novamente.", 
-          color: "text-red-500" 
+          color: "text-red-500",
+          className: "mb-0"
         });
       }
     }

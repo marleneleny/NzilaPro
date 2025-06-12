@@ -587,7 +587,7 @@ const handleSave = async () => {
           {/* Company Name */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Nome da Empresa *
+              Nome da Empresa 
             </label>
             <input
               type="text"
@@ -603,7 +603,7 @@ const handleSave = async () => {
           {/* Business Area */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Área de Negócio *
+              Área de Negócio 
             </label>
             <select
               name="businessArea"
@@ -710,22 +710,6 @@ const handleSave = async () => {
               onChange={handleInputChange}
               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:border-green-500 transition-colors"
               placeholder="Rua, Cidade, País"
-            />
-          </div>
-
-          {/* Number of Employees */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Número de Funcionários
-            </label>
-            <input
-              type="number"
-              name="employees"
-              value={companyData.employees}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:border-green-500 transition-colors"
-              placeholder="Ex: 50"
-              min="0"
             />
           </div>
 

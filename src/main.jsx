@@ -20,6 +20,8 @@ import Profile from "./pages/Profile";
 import SobreNosEmpresa from "./pages/SobreNosEmpresa";
 import ProfileEmpresa from "./pages/ProfileEmpresa";
 import PublicarV from "./pages/PublicarV";
+import Candidatos from "./pages/Candidatos";
+import Resultado from "./pages/Resultado";
 
 // Configurando as rotas
 const router = createBrowserRouter([
@@ -110,6 +112,14 @@ const router = createBrowserRouter([
       {
         path: "publicar-vagas",
         element: <PublicarV />,
+      },
+      {
+        path: "candidatos",
+        element: <Candidatos />,
+      },
+      {
+        path: "resultados",
+        element: <Resultado />,
       },
       
     ],
