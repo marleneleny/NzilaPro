@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 // Função para extrair área de atuação do CV
 const extractAreaFromCV = (fileName) => {
   // Sua lógica de extração aqui
-  return "Área detectada";
+  return "Área de atuação";
 };
 
 const extractFocusFromCV = (fileName, content, area) => {
@@ -104,13 +104,13 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     // 1. PRIMEIRA VERIFICAÇÃO: Indicadores NEGATIVOS CRÍTICOS (rejeição automática)
     const criticalNegativeIndicators = [
       // Livros e literatura
-      "livro", "book", "ebook", "romance", "historia", "história", "contos", "conto", "sonhos", 
+      "livro", "book", "ebook", "romance", "historia", "história", "contos", "conto", "sonhos", "augusto","Augusto","Curry","curry",
       "disciplina", "desenvolvimento pessoal", "autoajuda", "auto-ajuda", "motivação", "motivacao",
-      "inspiração", "inspiracao", "reflexões", "reflexoes", "pensamentos", "filosofia", "espiritualidade",
+      "inspiração", "inspiracao", "reflexões", "reflexoes", "pensamentos", "filosofia", "espiritualidade","augusto","exercício","Exercício",
       // Documentos acadêmicos/técnicos (exceto tese/dissertação que podem ser parte do CV)
-      "manual", "tutorial", "artigo", "article", "paper", "monografia", "pesquisa", "estudo",
+      "manual", "tutorial", "artigo", "article", "paper", "monografia", "pesquisa", "estudo","verb","Exercícios","exercícios","exerc","Exercices","exercises",
       // Documentos comerciais
-      "relatório", "relatorio", "report", "apresentação", "apresentacao", "slides", "powerpoint", "ppt",
+      "relatório", "relatorio", "report", "apresentação", "apresentacao", "slides", "powerpoint", "ppt","diagrama", "actor", "ator",
       "planilha", "excel", "contrato", "contract", "invoice", "fatura", "receipt", "comprovante",
       "catalogo", "catálogo",
       // Mídia e entretenimento
@@ -128,7 +128,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       );
       setValidationResult({
         isValid: false,
-        message: `Este arquivo parece ser um "${matchedIndicator}" e não um currículo profissional. Por favor, envie seu CV pessoal.`,
+        message: `Este arquivo parece ser um outro arquivo e não um currículo profissional. Por favor, envie seu CV pessoal.`,
       });
       setIsValidating(false);
       return;
@@ -301,45 +301,63 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setIsDragging(false);
   };
 
-  const handleSave = async () => {
-    if (validationResult?.isValid && file) {
-      setIsSaving(true);
-      try {
-        console.log("Iniciando upload do CV:", file.name);
-        
-        // Upload real para Cloudinary
-        const uploadedCV = await uploadDocument(file);
-        console.log("CV uploaded para Cloudinary:", uploadedCV);
-        
-        // Extrair área e foco
-        const detectedArea = extractAreaFromCV(file.name);
-        const detectedFocus = extractFocusFromCV(file.name, "", detectedArea);
-        
-        // Preparar dados do CV
-        const cvData = {
-          fileName: file.name,
-          url: uploadedCV.secure_url,
-          publicId: uploadedCV.public_id,
-          area: detectedArea,
-          focus: detectedFocus,
-          uploadDate: new Date().toISOString(),
-          fileSize: file.size,
-          fileType: file.type
-        };
-        
-        console.log("Dados do CV preparados:", cvData);
-        
-        // Chamar função de save do componente pai
-        await onSave(cvData);
-        
-      } catch (error) {
-        console.error("Erro ao fazer upload do CV:", error);
-        alert("Erro ao fazer upload do currículo. Verifique sua conexão e tente novamente.");
-      } finally {
-        setIsSaving(false);
+const handleSave = async () => {
+  if (validationResult?.isValid && file) {
+    setIsSaving(true);
+    try {
+      console.log("Iniciando upload do CV:", file.name);
+      
+      // Upload real para Cloudinary
+      const uploadedCV = await uploadDocument(file);
+      console.log("CV uploaded para Cloudinary:", uploadedCV);
+      
+      // Validar se o upload foi bem-sucedido
+      if (!uploadedCV.url || !uploadedCV.publicId) {
+        throw new Error("Upload incompleto - URL ou publicId não retornados");
       }
+      
+      // CORREÇÃO SIMPLES: Não definir area e focus aqui
+      // Deixar que o componente Profile gerencie esses valores
+      const cvData = {
+        fileName: file.name,
+        url: uploadedCV.url,
+        publicId: uploadedCV.publicId,
+        // Remover area e focus - serão definidos no Profile
+        uploadDate: new Date().toISOString(),
+        fileSize: file.size,
+        fileType: file.type,
+        // Dados adicionais do Cloudinary (opcional)
+        originalName: uploadedCV.originalName,
+        format: uploadedCV.format
+      };
+      
+      console.log("Dados do CV preparados:", cvData);
+      
+      // Validar cvData antes de salvar
+      if (!cvData.url || !cvData.publicId) {
+        throw new Error("Dados do CV inválidos - URL ou publicId ausentes");
+      }
+      
+      // Chamar função de save do componente pai
+      await onSave(cvData);
+      
+    } catch (error) {
+      console.error("Erro ao fazer upload do CV:", error);
+      
+      // Mensagem de erro mais específica
+      if (error.message.includes("Upload incompleto")) {
+        alert("Erro no upload: Dados incompletos retornados do servidor. Tente novamente.");
+      } else if (error.message.includes("Dados do CV inválidos")) {
+        alert("Erro na preparação dos dados do CV. Tente novamente.");
+      } else {
+        alert("Erro ao fazer upload do currículo. Verifique sua conexão e tente novamente.");
+      }
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }
+};
+
 
   const resetModal = () => {
     setFile(null);
@@ -541,23 +559,40 @@ const Profile = () => {
   // FUNÇÃO AUXILIAR PARA VERIFICAR AUTENTICAÇÃO
   // ========================================
   const isAuthenticated = () => {
-    console.log("Verificando autenticação:", {
-      User: !!User,
-      uid: User?.uid,
-      id: User?.id,
-      email: User?.email
-    });
-    
-    return User && (User.uid || User.id);
-  };
+  const userId = getUserId();
+  const email = User?.email || auth.currentUser?.email;
+  
+  return !!userId && !!email; // ✅ Agora usa o ID corretamente
+};
 
-  const getUserId = () => {
-    return User?.uid || User?.id;
-  };
+useEffect(() => {
+  console.log("Dados do usuário no Profile:", {
+    FirestoreID: User?.id,      // ID que você salvou
+    AuthUID: User?.uid,         // UID padrão do Firebase
+    CurrentAuthUID: auth.currentUser?.uid // Fallback direto
+  });
+}, [User]);
 
-  // ========================================
+const getUserId = () => {
+  // Prioridade 1: ID do contexto (User.id)
+  if (User?.id) return User.id;
+  
+  // Prioridade 2: UID do Firebase Auth (do contexto)
+  if (User?.uid) return User.uid;
+  
+  // Prioridade 3: UID do auth.currentUser (fallback)
+  if (auth.currentUser?.uid) return auth.currentUser.uid;
+  
+  console.error("ID não encontrado. Dados disponíveis:", {
+    ContextUser: User,
+    AuthUser: auth.currentUser
+  });
+  
+  return null;
+};
+
+
   // CARREGAMENTO INICIAL DOS DADOS
-  // ========================================
   useEffect(() => {
     const loadUserData = async () => {
       if (User && getUserId()) {
@@ -587,6 +622,23 @@ const Profile = () => {
     loadUserData();
   }, [User]);
 
+  useEffect(() => {
+  // Limpar estado quando não há usuário autenticado
+  if (!User || !getUserId()) {
+    setUserCV(null);
+    setFormData({
+      fullName: "",
+      email: "",
+      area: "",
+      specialization: "",
+      accountType: "",
+      contact: "",
+      about: "",
+      portifolio: "",
+    });
+  }
+}, [User]);
+
   // FUNÇÕES DE VALIDAÇÃO
   const validateUrl = (url) => {
     if (!url) return true;
@@ -603,21 +655,16 @@ const Profile = () => {
   // ========================================
   const loadCVFromStorage = () => {
     try {
-      const userId = getUserId();
-      
-      if (userId) {
-        const userSpecificCV = localStorage.getItem(`userCV_${userId}`);
-        if (userSpecificCV) {
-          console.log("CV carregado do localStorage (específico):", userSpecificCV);
-          return JSON.parse(userSpecificCV);
-        }
+    const userId = getUserId();
+    
+    if (userId) {
+      const userSpecificCV = localStorage.getItem(`userCV_${userId}`);
+      if (userSpecificCV) {
+        console.log("CV carregado do localStorage para usuário:", userId);
+        return JSON.parse(userSpecificCV);
       }
+    }
       
-      const storedCV = localStorage.getItem("userCV");
-      if (storedCV) {
-        console.log("CV carregado do localStorage (geral):", storedCV);
-        return JSON.parse(storedCV);
-      }
     } catch (error) {
       console.error("Erro ao carregar CV do localStorage:", error);
     }
@@ -625,22 +672,21 @@ const Profile = () => {
   };
 
   const saveCVToStorage = (cvData) => {
-    try {
-      const userId = getUserId();
-      if (userId && cvData) {
-        const dataToSave = {
-          fileName: cvData.fileName || cvData.name,
-          url: cvData.url,
-          publicId: cvData.publicId,
-          area: cvData.area,
-          focus: cvData.focus,
-          uploadDate: cvData.uploadDate,
-          fileSize: cvData.fileSize || cvData.size,
-          fileType: cvData.fileType || cvData.type
-        };
+   try {
+    const userId = getUserId();
+    if (userId && cvData) {
+      const dataToSave = {
+        fileName: cvData.fileName || cvData.name,
+        url: cvData.url,
+        publicId: cvData.publicId,
+        area: cvData.area,
+        focus: cvData.focus,
+        uploadDate: cvData.uploadDate,
+        fileSize: cvData.fileSize || cvData.size,
+        fileType: cvData.fileType || cvData.type
+      };
         
         localStorage.setItem(`userCV_${userId}`, JSON.stringify(dataToSave));
-        localStorage.setItem("userCV", JSON.stringify(dataToSave));
         console.log("Metadados do CV salvos no localStorage:", dataToSave);
       }
     } catch (error) {
@@ -656,7 +702,7 @@ const Profile = () => {
         localStorage.removeItem(`userCV_${userId}`);
       }
       
-      localStorage.removeItem("userCV");
+      
       console.log("CV removido do localStorage");
     } catch (error) {
       console.error("Erro ao remover CV do localStorage:", error);
@@ -685,70 +731,57 @@ const Profile = () => {
     }
   };
 
-  const handleCVSave = async (cvDataOrFile) => {
-    if (!isAuthenticated()) {
-      alert("Usuário não autenticado para upload de CV. Por favor, faça login.");
-      return;
-    }
+const handleCVSave = async (cvDataOrFile) => {
+  if (!isAuthenticated()) {
+    alert("Usuário não autenticado para upload de CV. Por favor, faça login.");
+    return;
+  }
 
-    try {
-      setCvSaveLoading(true);
-      let cvData;
+  try {
+    setCvSaveLoading(true);
+    let cvData;
 
-      // Se recebeu um arquivo, fazer upload
-      if (cvDataOrFile instanceof File) {
-        const userId = getUserId();
-        const uploadResult = await uploadDocument(cvDataOrFile, userId);
-
-        cvData = {
-          fileName: uploadResult.originalName,
-          name: uploadResult.originalName,
-          size: uploadResult.size,
-          type: cvDataOrFile.type,
-          uploadDate: new Date().toISOString(),
-          url: uploadResult.url,
-          publicId: uploadResult.publicId,
-        };
-      } else {
-        // Se recebeu dados do CV já processados
-        cvData = cvDataOrFile;
-      }
-      
-      // Salvar no Firestore
+    // Se recebeu um arquivo, fazer upload
+    if (cvDataOrFile instanceof File) {
       const userId = getUserId();
-      if (userId) {
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          cvData: cvData,
-          area: cvData.area || formData.area,
-          specialization: cvData.focus || formData.specialization,
-          updatedAt: new Date()
-        });
-      }
-      
-      // Salvar no localStorage
-      saveCVToStorage(cvData);
-      setUserCV(cvData);
-      
-      // Atualizar contexto do usuário
-      SetUser(prev => ({
-        ...prev,
-        cvData: cvData,
-        area: cvData.area || prev.area,
-        specialization: cvData.focus || prev.specialization
-      }));
-      
-      setShowUploadModal(false);
-      alert("Currículo salvo com sucesso!");
-      console.log("CV salvo com sucesso:", cvData);
-      
-    } catch (error) {
-      console.error("Erro ao salvar CV:", error);
-      alert("Erro ao salvar currículo. Tente novamente.");
-    } finally {
-      setCvSaveLoading(false);
+      const uploadResult = await uploadDocument(cvDataOrFile, userId);
+
+      cvData = {
+        fileName: uploadResult.originalName,
+        name: uploadResult.originalName,
+        size: uploadResult.size,
+        type: cvDataOrFile.type,
+        uploadDate: new Date().toISOString(),
+        url: uploadResult.url,
+        publicId: uploadResult.publicId,
+        // Preservar valores do formulário atual
+        area: formData.area,
+        focus: formData.specialization,
+      };
+    } else {
+      // Se recebeu dados do CV já processados
+      cvData = {
+        ...cvDataOrFile,
+        // Preservar valores do formulário atual
+        area: formData.area,
+        focus: formData.specialization,
+      };
     }
-  };
+    
+    // Salvar CV no localStorage e definir no estado
+    saveCVToStorage(cvData);
+    setUserCV(cvData);
+    setShowUploadModal(false);
+    
+    console.log("CV salvo com sucesso:", cvData);
+    
+  } catch (error) {
+    console.error("Erro ao salvar CV:", error);
+    alert("Erro ao salvar currículo. Tente novamente.");
+  } finally {
+    setCvSaveLoading(false);
+  }
+};
 
   const handleRemoveCV = async () => {
     if (!isAuthenticated()) {
@@ -1000,77 +1033,112 @@ const Profile = () => {
     }
   };
 
-  const handleSave = async () => {
-    console.log("Tentativa de salvamento - Estado do usuário:", {
-      User: !!User,
-      uid: User?.uid,
-      id: User?.id,
-      isAuthenticated: isAuthenticated()
-    });
+const handleSave = async () => {
+  console.log("Tentativa de salvamento - Estado do usuário:", {
+    User: !!User,
+    uid: User?.uid,
+    id: User?.id,
+    isAuthenticated: isAuthenticated(),
+    userCV: userCV,
+    formData: formData
+  });
 
-    if (!isAuthenticated()) {
-      alert("Usuário não autenticado. Por favor, faça login para salvar as alterações.");
-      return;
-    }
+  if (!isAuthenticated()) {
+    alert("Usuário não autenticado. Por favor, faça login para salvar as alterações.");
+    return;
+  }
 
-    // Validações básicas
-    const newErrors = {};
+  // Validações básicas
+  const newErrors = {};
+  
+  if (!formData.fullName.trim()) {
+    newErrors.fullName = 'Nome completo é obrigatório';
+  }
+  
+  if (!formData.email.trim()) {
+    newErrors.email = 'Email é obrigatório';
+  }
+  
+  if (formData.portifolio && !validateUrl(formData.portifolio)) {
+    newErrors.portifolio = 'URL do portfólio inválida';
+  }
+  
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length > 0) {
+    alert('Por favor, corrija os erros no formulário antes de salvar.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const userId = getUserId();
+    const userRef = doc(db, "users", userId);
     
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Nome completo é obrigatório';
-    }
+    // Primeiro, vamos buscar os dados atuais do usuário para preservar o CV
+    const currentUserDoc = await getDoc(userRef);
+    const currentUserData = currentUserDoc.exists() ? currentUserDoc.data() : {};
     
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email é obrigatório';
-    }
+    const updateData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      area: formData.area,
+      specialization: formData.specialization,
+      accountType: formData.accountType,
+      contact: formData.contact,
+      about: formData.about,
+      portifolio: formData.portifolio,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Preservar dados do CV existente
+    const existingCV = userCV || currentUserData.cvData || User?.cvData;
     
-    if (formData.portifolio && !validateUrl(formData.portifolio)) {
-      newErrors.portifolio = 'URL do portfólio inválida';
-    }
-    
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      alert('Por favor, corrija os erros no formulário antes de salvar.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const userId = getUserId();
-      const userRef = doc(db, "users", userId);
-      
-      const updateData = {
-        fullName: formData.fullName,
-        email: formData.email,
-        area: formData.area,
-        specialization: formData.specialization,
-        accountType: formData.accountType,
-        contact: formData.contact,
-        about: formData.about,
-        portifolio: formData.portifolio,
-        updatedAt: new Date().toISOString()
+    if (existingCV && existingCV.url) {
+      updateData.cvData = {
+        fileName: existingCV.fileName,
+        url: existingCV.url,
+        publicId: existingCV.publicId,
+        area: existingCV.area,
+        focus: existingCV.focus,
+        uploadDate: existingCV.uploadDate,
+        fileSize: existingCV.fileSize,
+        fileType: existingCV.fileType
       };
-
-      console.log("Salvando dados:", updateData);
-      await updateDoc(userRef, updateData);
-
-      // Atualizar o contexto
-      SetUser((prev) => ({
-        ...prev,
-        ...updateData
-      }));
-
-      alert("Perfil atualizado com sucesso!");
       
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
-      alert(`Erro ao atualizar perfil: ${error.message}`);
-    } finally {
-      setLoading(false);
+      console.log("Dados do CV preservados:", updateData.cvData);
+      
+      // Atualize também a área e especialização se vierem do CV e não estiverem preenchidas
+      if (existingCV.area && !updateData.area) {
+        updateData.area = existingCV.area;
+      }
+      if (existingCV.focus && !updateData.specialization) {
+        updateData.specialization = existingCV.focus;
+      }
+    } else {
+      console.log("Nenhum CV encontrado para preservar");
     }
-  };
+
+    console.log("Salvando dados completos:", updateData);
+    await updateDoc(userRef, updateData);
+
+    // Atualizar o contexto do usuário
+    SetUser((prev) => ({
+      ...prev,
+      ...updateData,
+      cvData: existingCV || prev.cvData // Preserva o CV existente
+    }));
+    window.location.reload();
+    alert("Perfil atualizado com sucesso!");
+    
+  } catch (error) {
+    console.error("Erro ao atualizar perfil:", error);
+    alert(`Erro ao atualizar perfil: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   async function handleLogout() {
     try {
@@ -1128,33 +1196,75 @@ const Profile = () => {
     }
   }, [User?.id, User?.uid, SetUser]);
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (isAuthenticated()) {
-        try {
-          const userId = getUserId();
-          const userRef = doc(db, "users", userId);
-          const userSnap = await getDoc(userRef);
-          
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            
-            if (userData.avatar && userData.avatar !== User.avatar) {
-              SetUser(prev => ({
-                ...prev,
-                avatar: userData.avatar,
-              }));
-              saveAvatarToStorage(userData.avatar);
-            }
-          }
-        } catch (error) {
-          console.error("Erro ao carregar dados do usuário:", error);
+useEffect(() => {
+  const loadUserCV = async () => {
+    if (!User || !getUserId()) return;
+
+    try {
+      // Primeiro, tenta carregar do localStorage
+      const storedCV = loadCVFromStorage();
+      if (storedCV && storedCV.url) {
+        console.log("CV carregado do localStorage:", storedCV);
+        setUserCV(storedCV);
+        return;
+      }
+
+      // Se não encontrar no localStorage, busca no Firestore
+      const userId = getUserId();
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.cvData && userData.cvData.url) {
+          console.log("CV carregado do Firestore:", userData.cvData);
+          setUserCV(userData.cvData);
+          // Salva no localStorage para próximas sessões
+          saveCVToStorage(userData.cvData);
         }
       }
-    };
+    } catch (error) {
+      console.error("Erro ao carregar CV do usuário:", error);
+    }
+  };
 
-    loadUserData();
-  }, [User?.id, User?.uid]);
+  loadUserCV();
+}, [User]);
+
+
+
+useEffect(() => {
+  const loadUserCV = async () => {
+    if (User && getUserId()) {
+      try {
+        // 1. Tentar carregar do Firestore primeiro
+        const userRef = doc(db, "users", getUserId());
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          if (userData.cvData) {
+            console.log("CV carregado do Firestore:", userData.cvData);
+            setUserCV(userData.cvData);
+            saveCVToStorage(userData.cvData); // Sincronizar com localStorage
+            return;
+          }
+        }
+        
+        // 2. Se não encontrou no Firestore, tentar localStorage
+        const storedCV = loadCVFromStorage();
+        if (storedCV) {
+          console.log("CV carregado do localStorage:", storedCV);
+          setUserCV(storedCV);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar CV do usuário:", error);
+      }
+    }
+  };
+
+  loadUserCV();
+}, [User]);
 
   useEffect(() => {
     if (isAuthenticated() && userCV) {

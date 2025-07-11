@@ -19,6 +19,8 @@ import { generateQuestionsFromCV } from "../services/geminiService";
 import FirestoreService from "../services/firestoreEntrevista";
 import SpeechRecognitionService from "../services/speechService";
 import { useNavigate } from "react-router-dom";
+import * as faceapi from 'face-api.js';
+
 
 export default function Avaliacao() {
   const { User } = useAuth();
@@ -413,145 +415,497 @@ const loadUserCVData = () => {
     return [
       {
         id: 1,
-        text: `Fale sobre sua experiência em ${userArea} e o que mais te motiva nesta área.`,
-        category: "Experiência",
+        text: `Conte-me sobre sua trajetória em ${userArea}. O que mais te motiva nesta área e como você descobriu sua paixão por ela?`,
+        category: "DISC - Dominância",
         timeLimit: 120,
-        purpose: "Avaliar paixão e conhecimento da área",
+        purpose: "Avaliar motivação intrínseca e perfil comportamental dominante",
         basedOnCV: !!cvContent,
+        evaluationCriteria: ["Paixão genuína", "Clareza na comunicação", "Autoconhecimento"]
       },
       {
         id: 2,
-        text: "Descreva um projeto desafiador que você trabalhou recentemente. Como você lidou com as dificuldades?",
-        category: "Situacional",
+        text: "Descreva uma situação onde você teve que liderar um projeto ou tomar uma decisão difícil. Como você abordou o problema e quais foram os resultados?",
+        category: "DISC - Dominância/Influência",
         timeLimit: 150,
-        purpose: "Avaliar resolução de problemas",
+        purpose: "Avaliar liderança, tomada de decisão e perfil comportamental",
         basedOnCV: !!cvContent,
+        evaluationCriteria: ["Capacidade de liderança", "Processo de tomada de decisão", "Orientação para resultados"]
       },
       {
         id: 3,
-        text: "Quais tecnologias ou metodologias você considera mais importantes em sua área atualmente?",
-        category: "Técnica",
+        text: "Fale sobre uma vez em que você cometeu um erro significativo no trabalho. Como você reagiu e o que aprendeu com essa experiência?",
+        category: "Inteligência Emocional",
         timeLimit: 120,
-        purpose: "Avaliar conhecimento atualizado",
-        basedOnCV: !!cvContent,
+        purpose: "Avaliar maturidade emocional, responsabilidade e capacidade de aprendizado",
+        basedOnCV: false,
+        evaluationCriteria: ["Autoconsciência", "Responsabilidade", "Capacidade de aprendizado"]
       },
       {
         id: 4,
-        text: "Como você se mantém atualizado com as tendências e inovações da sua área?",
-        category: "Desenvolvimento Profissional",
-        timeLimit: 90,
-        purpose: "Avaliar proatividade e aprendizado contínuo",
-        basedOnCV: !!cvContent,
+        text: "Conte-me sobre um conflito que você teve com um colega de trabalho ou cliente. Como você lidou com a situação?",
+        category: "Inteligência Emocional",
+        timeLimit: 130,
+        purpose: "Avaliar habilidades interpessoais e gestão de conflitos",
+        basedOnCV: false,
+        evaluationCriteria: ["Empatia", "Comunicação assertiva", "Resolução de conflitos"]
       },
       {
         id: 5,
-        text: "Fale sobre uma situação onde você teve que trabalhar sob pressão. Como lidou com isso?",
-        category: "Comportamental",
+        text: "Descreva uma situação onde você teve que trabalhar sob pressão extrema ou com prazos muito apertados. Como você se organizou?",
+        category: "Big Five - Conscienciosidade",
         timeLimit: 120,
-        purpose: "Avaliar gestão de estresse",
+        purpose: "Avaliar gestão de estresse e organização",
         basedOnCV: false,
+        evaluationCriteria: ["Gestão do tempo", "Resistência ao estresse", "Organização"]
       },
       {
         id: 6,
-        text: "Onde você se vê profissionalmente nos próximos 3 anos?",
-        category: "Carreira",
-        timeLimit: 100,
-        purpose: "Avaliar ambição e planejamento",
-        basedOnCV: false,
+        text: "Fale sobre uma vez em que você teve que aprender uma nova tecnologia ou habilidade rapidamente. Como você abordou esse desafio?",
+        category: "Big Five - Abertura",
+        timeLimit: 110,
+        purpose: "Avaliar adaptabilidade e aprendizado contínuo",
+        basedOnCV: !!cvContent,
+        evaluationCriteria: ["Adaptabilidade", "Proatividade", "Estratégias de aprendizado"]
       },
       {
         id: 7,
-        text: "Como você lida com feedback negativo ou críticas construtivas?",
-        category: "Comportamental",
-        timeLimit: 90,
-        purpose: "Avaliar maturidade profissional",
+        text: "Conte-me sobre um projeto em equipe onde houve divergências de opinião. Como você contribuiu para chegar a uma solução?",
+        category: "DISC - Estabilidade/Conformidade",
+        timeLimit: 140,
+        purpose: "Avaliar trabalho em equipe e diplomacia",
         basedOnCV: false,
+        evaluationCriteria: ["Colaboração", "Diplomacia", "Orientação para consenso"]
       },
       {
         id: 8,
-        text: "Descreva seu estilo de trabalho e como você se relaciona com colegas de equipe.",
-        category: "Trabalho em Equipe",
+        text: "Descreva uma situação onde você teve que dar feedback difícil para alguém ou receber críticas. Como você manejou essa situação?",
+        category: "Inteligência Emocional",
         timeLimit: 120,
-        purpose: "Avaliar fit cultural",
+        purpose: "Avaliar comunicação assertiva e maturidade emocional",
         basedOnCV: false,
+        evaluationCriteria: ["Comunicação assertiva", "Maturidade emocional", "Capacidade de feedback"]
       },
       {
         id: 9,
-        text: "Qual foi sua maior conquista profissional até agora e por quê?",
-        category: "Realizações",
-        timeLimit: 130,
-        purpose: "Avaliar orgulho profissional e valores",
+        text: "Fale sobre seus valores profissionais. O que é mais importante para você em um ambiente de trabalho?",
+        category: "Cultura Organizacional",
+        timeLimit: 100,
+        purpose: "Avaliar alinhamento cultural e valores pessoais",
         basedOnCV: false,
+        evaluationCriteria: ["Clareza de valores", "Alinhamento cultural", "Autenticidade"]
       },
       {
         id: 10,
-        text: "Por que você está interessado em nossa empresa e nesta posição?",
-        category: "Motivação",
-        timeLimit: 100,
-        purpose: "Avaliar interesse genuíno",
-        basedOnCV: false,
+        text: "Conte-me sobre uma situação onde você teve que ser criativo ou inovador para resolver um problema. Qual foi sua abordagem?",
+        category: "Big Five - Abertura",
+        timeLimit: 130,
+        purpose: "Avaliar criatividade e pensamento inovador",
+        basedOnCV: !!cvContent,
+        evaluationCriteria: ["Criatividade", "Pensamento crítico", "Inovação"]
       },
+      {
+        id: 11,
+        text: "Descreva como você se vê contribuindo para nossa equipe e empresa. O que você traria de único?",
+        category: "Cultura Organizacional",
+        timeLimit: 120,
+        purpose: "Avaliar fit cultural e proposta de valor",
+        basedOnCV: false,
+        evaluationCriteria: ["Autoconhecimento", "Proposta de valor", "Fit cultural"]
+      },
+      {
+        id: 12,
+        text: "Fale sobre uma meta profissional que você estabeleceu e como trabalhou para alcançá-la. Qual foi o resultado?",
+        category: "Big Five - Conscienciosidade",
+        timeLimit: 140,
+        purpose: "Avaliar orientação para objetivos e persistência",
+        basedOnCV: false,
+        evaluationCriteria: ["Planejamento", "Persistência", "Orientação para resultados"]
+      }
     ];
   };
+// ===== CORREÇÕES PARA O SISTEMA DE ANÁLISE FACIAL =====
 
-  // Carregar modelos do Face-api.js
-  useEffect(() => {
+// 1. CARREGAMENTO DOS MODELOS - VERSÃO CORRIGIDA
+useEffect(() => {
+  const loadFaceApiModels = async () => {
+    try {
+      console.log("🔄 Iniciando carregamento dos modelos Face-api.js...");
+      
+      // Verificar se face-api.js está disponível
+      if (typeof faceapi === 'undefined') {
+        console.error("❌ Face-api.js não foi carregado corretamente");
+        setFaceApiLoaded(false);
+        return;
+      }
+
+      // Carregar modelos com tratamento de erro individual
+      const modelPromises = [
+        faceapi.nets.tinyFaceDetector.loadFromUri('/models').catch(e => {
+          console.error("❌ Erro ao carregar TinyFaceDetector:", e);
+          throw e;
+        }),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/models').catch(e => {
+          console.error("❌ Erro ao carregar FaceLandmark68Net:", e);
+          throw e;
+        }),
+        faceapi.nets.faceExpressionNet.loadFromUri('/models').catch(e => {
+          console.error("❌ Erro ao carregar FaceExpressionNet:", e);
+          throw e;
+        })
+      ];
+
+      await Promise.all(modelPromises);
+      
+      setFaceApiLoaded(true);
+      console.log("✅ Modelos Face-api.js carregados com sucesso!");
+      
+      // Verificar se os modelos foram realmente carregados
+      const modelsStatus = {
+        tinyFaceDetector: faceapi.nets.tinyFaceDetector.isLoaded,
+        faceLandmark68Net: faceapi.nets.faceLandmark68Net.isLoaded,
+        faceExpressionNet: faceapi.nets.faceExpressionNet.isLoaded
+      };
+      
+      console.log("📊 Status dos modelos:", modelsStatus);
+      
+      if (!Object.values(modelsStatus).every(status => status)) {
+        console.warn("⚠️ Alguns modelos não foram carregados corretamente");
+      }
+      
+    } catch (error) {
+      console.error("❌ Erro ao carregar modelos Face-api.js:", error);
+      console.log("Continuando sem análise facial...");
+      setFaceApiLoaded(false);
+    }
+  };
+  
+  loadFaceApiModels();
+}, []);
+
+// 2. FUNÇÃO DE ANÁLISE FACIAL MELHORADA
+useEffect(() => {
     const loadFaceApiModels = async () => {
       try {
-        console.log("Carregando modelos Face-api.js...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (typeof faceapi === 'undefined') {
+          console.error("Face-api.js not loaded.");
+          setFaceApiLoaded(false);
+          return;
+        }
+
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+          faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+          faceapi.nets.faceExpressionNet.loadFromUri('/models')
+        ]);
+
         setFaceApiLoaded(true);
-        console.log("Modelos Face-api.js carregados com sucesso!");
+        console.log("Face-api.js models loaded successfully.");
+
       } catch (error) {
-        console.error("Erro ao carregar modelos Face-api.js:", error);
+        console.error("Error loading Face-api.js models:", error);
+        setFaceApiLoaded(false);
       }
     };
 
     loadFaceApiModels();
   }, []);
 
-  // Análise facial contínua
+  // 2. Start Facial Analysis
   const startFaceAnalysis = () => {
-    if (!faceApiLoaded || !videoRef.current) return;
+    if (!faceApiLoaded || !videoRef.current) {
+      console.log("Face API not loaded or video not available.");
+      return;
+    }
+
+    stopFaceAnalysis(); // Ensure no multiple intervals are running
 
     analysisInterval.current = setInterval(async () => {
       try {
-        const mockAnalysis = {
-          timestamp: Date.now(),
-          faceDetected: Math.random() > 0.1,
-          expressions: {
-            neutral: Math.random() * 0.6 + 0.2,
-            happy: Math.random() * 0.3,
-            sad: Math.random() * 0.1,
-            angry: Math.random() * 0.05,
-            fearful: Math.random() * 0.05,
-            disgusted: Math.random() * 0.05,
-            surprised: Math.random() * 0.1,
-          },
-          eyeContact: {
-            score: Math.random() * 0.8 + 0.2,
-            looking: Math.random() > 0.3,
-          },
-          engagement: {
-            score: Math.random() * 0.7 + 0.3,
-            stability: Math.random() * 0.5 + 0.5,
-          },
-        };
+        const video = videoRef.current;
 
-        setCurrentAnalysis(mockAnalysis);
-        setBehaviorData((prev) => [...prev.slice(-19), mockAnalysis]);
+        if (!video || video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) {
+          console.log("Video not ready for analysis.");
+          return;
+        }
+
+        const detections = await faceapi
+          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({
+            inputSize: 416,
+            scoreThreshold: 0.25
+          }))
+          .withFaceLandmarks()
+          .withFaceExpressions();
+
+        let analysis;
+
+        if (detections && detections.length > 0) {
+          const detection = detections[0];
+          const expressions = detection.expressions;
+          const landmarks = detection.landmarks;
+          const faceBox = detection.detection.box;
+
+          const eyeContact = calculateImprovedEyeContact(landmarks, faceBox, video);
+          const engagement = calculateEngagement(expressions);
+
+          analysis = {
+            timestamp: Date.now(),
+            faceDetected: true,
+            confidence: Math.round(detection.detection.score * 100) / 100,
+            expressions: {
+              neutral: Math.round(expressions.neutral * 100) / 100,
+              happy: Math.round(expressions.happy * 100) / 100,
+              sad: Math.round(expressions.sad * 100) / 100,
+              angry: Math.round(expressions.angry * 100) / 100,
+              fearful: Math.round(expressions.fearful * 100) / 100,
+              disgusted: Math.round(expressions.disgusted * 100) / 100,
+              surprised: Math.round(expressions.surprised * 100) / 100,
+            },
+            eyeContact: {
+              score: Math.round(eyeContact.score * 100) / 100,
+              looking: eyeContact.looking,
+              direction: eyeContact.direction,
+              confidence: Math.round(eyeContact.confidence * 100) / 100
+            },
+            engagement: {
+              score: Math.round(engagement * 100) / 100,
+              stability: Math.round(calculateStability(expressions) * 100) / 100,
+            },
+            facePosition: {
+              x: Math.round(faceBox.x),
+              y: Math.round(faceBox.y),
+              width: Math.round(faceBox.width),
+              height: Math.round(faceBox.height),
+              centered: isFaceCentered(faceBox, video)
+            }
+          };
+        } else {
+          analysis = {
+            timestamp: Date.now(),
+            faceDetected: false,
+            confidence: 0,
+            expressions: { neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0 },
+            eyeContact: { score: 0, looking: false, direction: 'none', confidence: 0 },
+            engagement: { score: 0, stability: 0 },
+            facePosition: null
+          };
+        }
+
+        setCurrentAnalysis(analysis);
+        setBehaviorData((prev) => [...prev.slice(-19), analysis]); // Keep last 20 data points
+
       } catch (error) {
-        console.error("Erro na análise facial:", error);
+        console.error("Error during facial analysis:", error);
+        setCurrentAnalysis({
+          timestamp: Date.now(), faceDetected: false, confidence: 0, expressions: {}, eyeContact: {}, engagement: {}, error: error.message
+        });
       }
-    }, 2000);
+    }, 1000); // Analyze every 1 second
   };
 
+  // 3. Improved Eye Contact Calculation
+  const calculateImprovedEyeContact = (landmarks, faceBox, video) => {
+    if (!landmarks || !faceBox || !video) {
+      return { score: 0, looking: false, direction: 'unknown', confidence: 0 };
+    }
+
+    try {
+      const leftEye = landmarks.getLeftEye();
+      const rightEye = landmarks.getRightEye();
+      const nose = landmarks.getNose();
+
+      if (!leftEye || !rightEye || !nose || leftEye.length === 0 || rightEye.length === 0 || nose.length === 0) {
+        return { score: 0, looking: false, direction: 'unknown', confidence: 0 };
+      }
+
+      const leftEyeCenter = calculateCenter(leftEye);
+      const rightEyeCenter = calculateCenter(rightEye);
+      const noseCenter = calculateCenter(nose);
+
+      const faceCenterX = faceBox.x + (faceBox.width / 2);
+      const faceCenterY = faceBox.y + (faceBox.height / 2);
+
+      const screenCenterX = video.videoWidth / 2;
+      const screenCenterY = video.videoHeight / 2;
+
+      const eyeSymmetry = calculateEyeSymmetry(leftEyeCenter, rightEyeCenter, noseCenter);
+      const eyeOpenness = calculateEyeOpenness(leftEye, rightEye);
+      const faceDirection = calculateFaceDirection(faceCenterX, faceCenterY, screenCenterX, screenCenterY, faceBox);
+      const centerProximity = calculateCenterProximity(faceCenterX, faceCenterY, screenCenterX, screenCenterY, video);
+
+      const eyeContactScore = (
+        eyeSymmetry * 0.3 +
+        eyeOpenness * 0.25 +
+        centerProximity * 0.35 +
+        (1 - Math.abs(faceDirection.horizontal)) * 0.1
+      );
+
+      const finalScore = Math.max(0, Math.min(1, eyeContactScore));
+      const isLooking = finalScore > 0.6; // Threshold for "looking"
+
+      return {
+        score: finalScore,
+        looking: isLooking,
+        direction: faceDirection.description,
+        confidence: Math.min(eyeSymmetry + eyeOpenness, 1)
+      };
+
+    } catch (error) {
+      console.error("Error calculating eye contact:", error);
+      return { score: 0, looking: false, direction: 'error', confidence: 0 };
+    }
+  };
+
+  // 4. Auxiliary Functions for Calculations
+  const calculateCenter = (points) => {
+    const sum = points.reduce((acc, point) => ({
+      x: acc.x + point.x,
+      y: acc.y + point.y
+    }), { x: 0, y: 0 });
+
+    return {
+      x: sum.x / points.length,
+      y: sum.y / points.length
+    };
+  };
+
+  const calculateEyeSymmetry = (leftEyeCenter, rightEyeCenter, noseCenter) => {
+    try {
+      const leftDistance = Math.abs(leftEyeCenter.x - noseCenter.x);
+      const rightDistance = Math.abs(rightEyeCenter.x - noseCenter.x);
+      if (leftDistance === 0 && rightDistance === 0) return 1;
+      const maxDistance = Math.max(leftDistance, rightDistance);
+      const minDistance = Math.min(leftDistance, rightDistance);
+      return maxDistance > 0 ? minDistance / maxDistance : 1;
+    } catch (error) {
+      return 0.5;
+    }
+  };
+
+  const calculateEyeOpenness = (leftEye, rightEye) => {
+    try {
+      const leftEAR = calculateEAR(leftEye);
+      const rightEAR = calculateEAR(rightEye);
+      const avgEAR = (leftEAR + rightEAR) / 2;
+      return Math.max(0, Math.min(1, avgEAR * 4)); // Normalize EAR to 0-1
+    } catch (error) {
+      return 0.7;
+    }
+  };
+
+  const calculateEAR = (eyePoints) => {
+    if (eyePoints.length < 6) return 0;
+    const vertical1 = Math.abs(eyePoints[1].y - eyePoints[5].y);
+    const vertical2 = Math.abs(eyePoints[2].y - eyePoints[4].y);
+    const horizontal = Math.abs(eyePoints[0].x - eyePoints[3].x);
+    return horizontal === 0 ? 0 : (vertical1 + vertical2) / (2 * horizontal);
+  };
+
+  const calculateFaceDirection = (faceCenterX, faceCenterY, screenCenterX, screenCenterY, faceBox) => {
+    const horizontalOffset = (faceCenterX - screenCenterX) / (screenCenterX);
+    const verticalOffset = (faceCenterY - screenCenterY) / (screenCenterY);
+    let description = 'center';
+    if (Math.abs(horizontalOffset) > 0.3) {
+      description = horizontalOffset > 0 ? 'right' : 'left';
+    }
+    if (Math.abs(verticalOffset) > 0.3) {
+      description += verticalOffset > 0 ? '_down' : '_up';
+    }
+    return { horizontal: horizontalOffset, vertical: verticalOffset, description: description };
+  };
+
+  const calculateCenterProximity = (faceCenterX, faceCenterY, screenCenterX, screenCenterY, video) => {
+    const distance = Math.sqrt(
+      Math.pow(faceCenterX - screenCenterX, 2) +
+      Math.pow(faceCenterY - screenCenterY, 2)
+    );
+    const maxDistance = Math.sqrt(
+      Math.pow(video.videoWidth / 2, 2) +
+      Math.pow(video.videoHeight / 2, 2)
+    );
+    return Math.max(0, 1 - (distance / maxDistance));
+  };
+
+  const isFaceCentered = (faceBox, video) => {
+    const faceCenterX = faceBox.x + (faceBox.width / 2);
+    const faceCenterY = faceBox.y + (faceBox.height / 2);
+    const screenCenterX = video.videoWidth / 2;
+    const screenCenterY = video.videoHeight / 2;
+    const horizontalThreshold = video.videoWidth * 0.2;
+    const verticalThreshold = video.videoHeight * 0.2;
+    return Math.abs(faceCenterX - screenCenterX) < horizontalThreshold &&
+           Math.abs(faceCenterY - screenCenterY) < verticalThreshold;
+  };
+
+  // 5. Improved Engagement Calculation
+  const calculateEngagement = (expressions) => {
+    if (!expressions || typeof expressions !== 'object') return 0;
+    try {
+      const positiveEngagement =
+        (expressions.happy || 0) * 1.2 +
+        (expressions.surprised || 0) * 0.8 +
+        (expressions.neutral || 0) * 0.6;
+
+      const negativeEngagement =
+        (expressions.sad || 0) * 0.9 +
+        (expressions.angry || 0) * 1.0 +
+        (expressions.fearful || 0) * 0.8 +
+        (expressions.disgusted || 0) * 0.9;
+
+      const rawScore = positiveEngagement - negativeEngagement;
+      const normalizedScore = Math.max(0, Math.min(1, (rawScore + 1) / 2));
+      return normalizedScore;
+    } catch (error) {
+      console.error("Error calculating engagement:", error);
+      return 0.5;
+    }
+  };
+
+  // 6. Improved Stability Calculation
+  const calculateStability = (expressions) => {
+    if (!expressions || typeof expressions !== 'object') return 0;
+    try {
+      const values = Object.values(expressions).filter(v => typeof v === 'number' && !isNaN(v) && isFinite(v));
+      if (values.length === 0) return 0;
+      const sum = values.reduce((a, b) => a + b, 0);
+      const maxValue = Math.max(...values);
+      if (sum === 0) return 0;
+      const dominance = maxValue / sum;
+      const mean = sum / values.length;
+      const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+      const stability = Math.max(0, 1 - variance);
+      return (dominance * 0.6) + (stability * 0.4);
+    } catch (error) {
+      console.error("Error calculating stability:", error);
+      return 0.5;
+    }
+  };
+
+  // 7. Stop Facial Analysis
   const stopFaceAnalysis = () => {
     if (analysisInterval.current) {
       clearInterval(analysisInterval.current);
       analysisInterval.current = null;
+      console.log("Facial analysis stopped.");
     }
   };
+
+  // Placeholder for getting video stream
+  useEffect(() => {
+    const startVideoStream = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+      }
+    };
+    startVideoStream();
+  }, []);
+
+
+
 
   // Função para obter a especialização do usuário
   const getUserSpecialization = () => {
@@ -641,143 +995,195 @@ const loadUserCVData = () => {
     }
   };
 
-  // Iniciar gravação
-  // Substituir a função existente
-  const startRecording = async () => {
-    try {
-      const mediaStream = stream || (await initializeMedia());
 
-      if (!mediaStream) {
-        console.error("Stream de mídia não disponível");
-        return;
-      }
+const startRecording = async () => {
+  try {
+    console.log('🎬 Iniciando gravação...');
+    
+    const mediaStream = stream || (await initializeMedia());
 
-      const mediaRecorder = new MediaRecorder(mediaStream, {
-        mimeType: "video/webm;codecs=vp9",
-      });
-
-      mediaRecorderRef.current = mediaRecorder;
-      recordedChunks.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunks.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks.current, {
-          type: "video/webm",
-        });
-
-        const finalTranscript = transcription;
-        saveResponse(blob, finalTranscript);
-      };
-
-      // Iniciar gravação
-      mediaRecorder.start(1000);
-      startFaceAnalysis();
-
-      // Configurar reconhecimento de fala apenas se suportado
-      if (speechSupported && speechService) {
-        speechService.setOnResult(({ final, interim }) => {
-          setTranscription(final + interim);
-        });
-
-        const started = speechService.start();
-        if (started) {
-          setIsSpeechActive(true);
-          setSpeechError(null);
-        } else {
-          setSpeechError("Não foi possível iniciar o reconhecimento de fala");
-        }
-      }
-
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Erro ao iniciar gravação:", error);
-      alert("Erro ao iniciar gravação: " + error.message);
+    if (!mediaStream) {
+      console.error("Stream de mídia não disponível");
+      return;
     }
-  };
+
+    const mediaRecorder = new MediaRecorder(mediaStream, {
+      mimeType: "video/webm;codecs=vp9",
+    });
+
+    mediaRecorderRef.current = mediaRecorder;
+    recordedChunks.current = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.current.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      console.log('🎬 MediaRecorder parou automaticamente');
+      const blob = new Blob(recordedChunks.current, {
+        type: "video/webm",
+      });
+      
+      const finalTranscript = transcription || "Nenhuma transcrição capturada";
+      console.log('💾 Salvando resposta com transcrição:', finalTranscript);
+      
+      saveResponse(blob, finalTranscript);
+    };
+
+    mediaRecorder.start(1000);
+    setIsRecording(true);
+
+    // ⭐ CHAMADA DA ANÁLISE FACIAL REAL - ADICIONE ESTA LINHA
+    startFaceAnalysis();
+
+    // Iniciar reconhecimento de fala se suportado
+    if (speechSupported && speechService) {
+      try {
+        speechService.start();
+        setIsSpeechActive(true);
+      } catch (error) {
+        console.error('Erro ao iniciar reconhecimento de fala:', error);
+        setSpeechError(error.message);
+      }
+    }
+
+  } catch (error) {
+    console.error('Erro durante a gravação:', error);
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+    setSpeechError(`Erro na gravação: ${error.message}`);
+  }
+};
 
   // Função melhorada para parar gravação - SUBSTITUIR stopRecording
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      stopFaceAnalysis();
+// Substituir a função stopRecording existente
+const stopRecording = () => {
+  console.log('🛑 Parando gravação...', { isRecording, isSpeechActive });
+  
+  if (mediaRecorderRef.current && isRecording) {
+    // Parar gravação de vídeo
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+    
+    // Parar análise facial
+    stopFaceAnalysis();
 
-      // Parar reconhecimento de fala se estiver ativo
-      if (speechSupported && speechService && isSpeechActive) {
-        const finalTranscript = speechService.stop();
+    let finalTranscript = "";
+
+    // Parar reconhecimento de fala se estiver ativo
+    if (speechSupported && speechService && isSpeechActive) {
+      try {
+        finalTranscript = speechService.stop() || "";
         setIsSpeechActive(false);
-
-        // Criar blob da gravação
-        const blob = new Blob(recordedChunks.current, { type: "video/webm" });
-        saveResponse(blob, finalTranscript);
-
-        return finalTranscript;
-      } else {
-        // Se não há speech recognition, usar transcrição atual
-        const blob = new Blob(recordedChunks.current, { type: "video/webm" });
-        saveResponse(blob, transcription);
-        return transcription;
+        console.log('🎤 Transcrição final do speech service:', finalTranscript);
+      } catch (error) {
+        console.error('Erro ao parar speech service:', error);
+        finalTranscript = transcription || "";
       }
+    } else {
+      // Se não há speech recognition, usar transcrição atual
+      finalTranscript = transcription || "";
+      console.log('📝 Usando transcrição atual:', finalTranscript);
     }
-  };
+
+    // Criar blob manualmente para parada manual
+    const blob = new Blob(recordedChunks.current, { type: "video/webm" });
+    
+    // Salvar resposta manualmente (para paradas manuais)
+    console.log('💾 Salvando resposta manual com transcrição:', finalTranscript);
+    saveResponse(blob, finalTranscript);
+
+    return finalTranscript;
+  }
+};
 
   // Simular transcrição
-  const saveResponse = (blob, finalTranscript) => {
-    const questionBehaviorData = behaviorData.filter(
-      (data) =>
-        data.timestamp >=
-        Date.now() - (questions[currentQuestion]?.timeLimit * 1000 || 120000)
-    );
+// Substituir a função saveResponse existente
+const saveResponse = (blob, finalTranscript) => {
+  console.log('💾 Executando saveResponse...', {
+    hasBlob: !!blob,
+    transcription: finalTranscript,
+    currentQuestion: currentQuestion,
+    questionText: questions[currentQuestion]?.text
+  });
 
-    const avgEngagement =
-      questionBehaviorData.reduce(
-        (acc, curr) => acc + (curr.engagement?.score || 0),
-        0
-      ) / questionBehaviorData.length;
+  const questionBehaviorData = behaviorData.filter(
+    (data) =>
+      data.timestamp >=
+      Date.now() - (questions[currentQuestion]?.timeLimit * 1000 || 120000)
+  );
 
-    const avgEyeContact =
-      questionBehaviorData.reduce(
-        (acc, curr) => acc + (curr.eyeContact?.score || 0),
-        0
-      ) / questionBehaviorData.length;
+  const avgEngagement =
+    questionBehaviorData.length > 0
+      ? questionBehaviorData.reduce(
+          (acc, curr) => acc + (curr.engagement?.score || 0),
+          0
+        ) / questionBehaviorData.length
+      : 0;
 
-    const dominantExpression = questionBehaviorData.reduce((acc, curr) => {
-      const expressions = curr.expressions || {};
-      const maxExpr = Object.keys(expressions).reduce((a, b) =>
+  const avgEyeContact =
+    questionBehaviorData.length > 0
+      ? questionBehaviorData.reduce(
+          (acc, curr) => acc + (curr.eyeContact?.score || 0),
+          0
+        ) / questionBehaviorData.length
+      : 0;
+
+  const dominantExpression = questionBehaviorData.reduce((acc, curr) => {
+    const expressions = curr.expressions || {};
+    const expressionKeys = Object.keys(expressions);
+    if (expressionKeys.length > 0) {
+      const maxExpr = expressionKeys.reduce((a, b) =>
         expressions[a] > expressions[b] ? a : b
       );
       acc[maxExpr] = (acc[maxExpr] || 0) + 1;
-      return acc;
-    }, {});
+    }
+    return acc;
+  }, {});
 
-    setResponses((prev) => [
-      ...prev,
-      {
-        questionId: questions[currentQuestion]?.id,
-        question: questions[currentQuestion]?.text,
-        category: questions[currentQuestion]?.category,
-        purpose: questions[currentQuestion]?.purpose,
-        basedOnCV: questions[currentQuestion]?.basedOnCV,
-        transcription: finalTranscript || "Nenhuma transcrição disponível",
-        audioBlob: blob,
-        duration: (questions[currentQuestion]?.timeLimit || 120) - timeLeft,
-        timestamp: new Date().toISOString(),
-        behaviorAnalysis: {
-          avgEngagement: avgEngagement || 0,
-          avgEyeContact: avgEyeContact || 0,
-          dominantExpression: Object.keys(dominantExpression)[0] || "neutral",
-          dataPoints: questionBehaviorData.length,
-        },
-      },
-    ]);
+  // Garantir que temos uma transcrição válida
+  const validTranscription = finalTranscript && finalTranscript.trim() !== "" 
+    ? finalTranscript.trim() 
+    : transcription && transcription.trim() !== ""
+    ? transcription.trim()
+    : "Resposta de áudio capturada sem transcrição de texto";
 
-    setTranscription(""); // Resetar a transcrição para a próxima pergunta
+  console.log('💬 Salvando resposta com transcrição validada:', validTranscription);
+
+  const newResponse = {
+    questionId: questions[currentQuestion]?.id,
+    question: questions[currentQuestion]?.text,
+    category: questions[currentQuestion]?.category,
+    purpose: questions[currentQuestion]?.purpose,
+    basedOnCV: questions[currentQuestion]?.basedOnCV,
+    transcription: validTranscription, // TRANSCRIÇÃO DA RESPOSTA DO USUÁRIO
+    audioBlob: blob, // BLOB DO ÁUDIO/VÍDEO
+    duration: (questions[currentQuestion]?.timeLimit || 120) - timeLeft,
+    timestamp: new Date().toISOString(),
+    behaviorAnalysis: {
+      avgEngagement: Number(avgEngagement.toFixed(2)) || 0,
+      avgEyeContact: Number(avgEyeContact.toFixed(2)) || 0,
+      dominantExpression: Object.keys(dominantExpression)[0] || "neutral",
+      dataPoints: questionBehaviorData.length,
+    },
   };
+
+  setResponses((prev) => {
+    const updatedResponses = [...prev, newResponse];
+    console.log('📝 Resposta adicionada. Total de respostas:', updatedResponses.length);
+    return updatedResponses;
+  });
+
+  // Resetar a transcrição para a próxima pergunta
+  setTranscription("");
+  console.log('✅ saveResponse concluído');
+};
+
+
 
   // Iniciar entrevista
   const startInterview = async () => {
@@ -794,16 +1200,22 @@ const loadUserCVData = () => {
 
   // Próxima pergunta
   const handleNextQuestion = () => {
-    stopRecording();
+  // Primeiro para a gravação atual (que já chama saveResponse)
+  stopRecording();
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
-      setTimeLeft(questions[currentQuestion + 1]?.timeLimit || 120);
-      setTimeout(() => startRecording(), 1000);
-    } else {
-      finishInterview();
-    }
-  };
+  // Limpa a transcrição imediatamente
+  setTranscription("");
+
+  if (currentQuestion < questions.length - 1) {
+    setCurrentQuestion((prev) => prev + 1);
+    setTimeLeft(questions[currentQuestion + 1]?.timeLimit || 120);
+    
+    // Inicia nova gravação após um pequeno delay
+    setTimeout(() => startRecording(), 1000);
+  } else {
+    finishInterview();
+  }
+};
 
   // Finalizar entrevista
 
@@ -1378,16 +1790,7 @@ const finishInterview = async () => {
                   </div>
                 </div>
               </div>
-
-              {/* Controles centrais */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={finishInterview}
-                  className="w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all"
-                >
-                  <PhoneOff className="w-4 h-4 text-white" />
-                </button>
-              </div>
+             
 
               {/* Controles adicionais */}
               <div className="flex items-center space-x-2">

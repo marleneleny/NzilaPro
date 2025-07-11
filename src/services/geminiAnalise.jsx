@@ -14,319 +14,218 @@ class GeminiAnalysisService {
     this.model = this.genAI ? this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" }) : null;
   }
 
-  // Verificar se o serviço está configurado corretamente
-  isConfigured() {
-    return !!(this.apiKey && this.genAI && this.model);
-  }
+  async analyzeInterviewPerformance(interviewData) {
+    if (!this.genAI) {
+      throw new Error('Gemini API não configurada. Configure REACT_APP_GEMINI_API_KEY no seu .env');
+    }
 
-  // Preparar dados da entrevista para análise
-  prepareInterviewDataForAnalysis(interviewData, responsesData) {
     try {
-      console.log('📋 Preparando dados para análise...');
+      console.log('🤖 Iniciando análise com Gemini...');
       
-      const { interview } = interviewData;
-      const responses = responsesData[0] || {};
+      const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
       
-      const analysisData = {
-        candidate: {
-          name: interview.userName || 'Candidato',
-          email: interview.userEmail || '',
-          specialization: interview.userSpecialization || '',
-          accountType: interview.userAccountType || '',
-          contact: interview.userContact || '',
-          about: interview.userAbout || ''
-        },
-        interview: {
-          id: interview.id,
-          totalQuestions: interview.totalQuestions || 0,
-          completedQuestions: interview.completedQuestions || 0,
-          duration: interview.duration || 0,
-          status: interview.status || '',
-          startTime: interview.startTime,
-          endTime: interview.endTime
-        },
-        responses: {
-          questions: responses.questions || [],
-          answers: responses.responses || [],
-          behaviorData: responses.behaviorData || [],
-          cvContent: responses.cvContent || null
-        },
-        metadata: responses.analysisMetadata || {}
+      const analysisPrompt = this.buildAnalysisPrompt(interviewData);
+      
+      const result = await model.generateContent(analysisPrompt);
+      const response = await result.response;
+      const analysisText = response.text();
+      
+      // Parse da resposta estruturada
+      const analysis = this.parseGeminiResponse(analysisText);
+      
+      console.log('✅ Análise do Gemini concluída');
+      return {
+        success: true,
+        analysis: analysis,
+        rawResponse: analysisText
       };
-
-      console.log('✅ Dados preparados para análise');
-      return analysisData;
       
     } catch (error) {
-      console.error('❌ Erro ao preparar dados:', error);
-      throw new Error('Erro ao preparar dados para análise');
+      console.error('❌ Erro na análise do Gemini:', error);
+      return {
+        success: false,
+        error: error.message,
+        analysis: this.getFallbackAnalysis()
+      };
     }
   }
 
-  // Criar prompt estruturado para análise
-  createAnalysisPrompt(analysisData) {
-    const { candidate, interview, responses, metadata } = analysisData;
+  buildAnalysisPrompt(interviewData) {
+    const { interview, responses } = interviewData;
     
-    return `
-# ANÁLISE COMPLETA DE ENTREVISTA
+    // Extrair dados das respostas
+    const responsesData = responses.map(responseDoc => ({
+      questions: responseDoc.questions || [],
+      responses: responseDoc.responses || [],
+      behaviorData: responseDoc.behaviorData || {},
+      analysisMetadata: responseDoc.analysisMetadata || {}
+    }));
 
-## DADOS DO CANDIDATO
-- Nome: ${candidate.name}
-- Especialização: ${candidate.specialization}
-- Tipo de Conta: ${candidate.accountType}
-- Sobre: ${candidate.about}
+    // Construir dados consolidados
+    const allQuestions = responsesData.flatMap(r => r.questions);
+    const allResponses = responsesData.flatMap(r => r.responses);
+    const behaviorMetrics = responsesData.map(r => r.analysisMetadata).filter(m => m);
 
-## DADOS DA ENTREVISTA
-- ID: ${interview.id}
+    const prompt = `
+Você é um especialista em análise de entrevistas de emprego e avaliação comportamental com foco em metodologias de RH modernas.
+Analise os seguintes dados de uma entrevista e forneça uma avaliação detalhada baseada em critérios profissionais de recrutamento.
+
+DADOS DA ENTREVISTA:
+- Candidato: ${interview.userName}
+- Especialização: ${interview.userSpecialization}
 - Total de Perguntas: ${interview.totalQuestions}
 - Perguntas Respondidas: ${interview.completedQuestions}
 - Duração: ${interview.duration} segundos
 - Status: ${interview.status}
 
-## PERGUNTAS E RESPOSTAS
-${responses.questions.map((question, index) => `
-**Pergunta ${index + 1}:** ${question.text || question}
-**Resposta:** ${responses.answers[index]?.text || responses.answers[index] || 'Não respondida'}
+PERGUNTAS E RESPOSTAS:
+${allQuestions.map((q, i) => `
+Pergunta ${i + 1}: ${q.text || q.question || 'Pergunta não especificada'}
+Resposta: ${allResponses[i]?.transcription || 'Sem resposta gravada'}
 `).join('\n')}
 
-## DADOS COMPORTAMENTAIS
-- Pontos de Dados Comportamentais: ${metadata.totalBehaviorDataPoints || 0}
-- Engajamento Médio: ${metadata.avgEngagement || 0}%
-- Contato Visual Médio: ${metadata.avgEyeContact || 0}%
-- Expressões Dominantes: ${JSON.stringify(metadata.dominantExpressions || {})}
+DADOS COMPORTAMENTAIS (AGREGADOS):
+${behaviorMetrics.map(m => `
+- Engajamento Médio: ${(m.avgEngagement * 100).toFixed(1)}%
+- Contato Visual Médio: ${(m.avgEyeContact * 100).toFixed(1)}%
+- Confiança Média: ${(m.avgConfidence * 100).toFixed(1)}%
+- Transcrições Válidas: ${m.transcriptionsFound}/${m.responsesCount}
+- Taxa de Detecção Facial: ${(m.faceDetectionRate * 100).toFixed(1)}%
+- Expressões Dominantes: ${JSON.stringify(m.dominantExpressions)}
+`).join('\n')}
 
-## ANÁLISE SOLICITADA
-Por favor, forneça uma análise completa e estruturada desta entrevista incluindo:
+CRITÉRIOS DE AVALIAÇÃO PROFISSIONAL:
+1. Avaliações Comportamentais e Psicológicas
+   - Teste DISC: identifica perfil comportamental
+   - Teste de personalidade (Big Five): extroversão, responsabilidade, estabilidade emocional
+   - Teste de inteligência emocional: controle emocional, empatia, autoconsciência
+   - Avaliação de valores e cultura organizacional: alinhamento aos valores da empresa
 
-### 1. RESUMO EXECUTIVO
-- Avaliação geral do candidato
-- Principais pontos fortes
-- Principais áreas de melhoria
-- Recomendação final (Recomendado/Parcialmente Recomendado/Não Recomendado)
+2. Avaliações Técnicas
+   - Perguntas técnicas adequadas para teste em vídeo
+   - Competências específicas da área de especialização
+   - Capacidade de explicar conceitos técnicos
 
-### 2. ANÁLISE TÉCNICA
-- Qualidade das respostas técnicas
-- Conhecimento demonstrado na área de especialização
-- Capacidade de comunicação técnica
+INSTRUÇÕES PARA ANÁLISE:
+1. Calcule uma pontuação geral de 0-50% (NUNCA acima de 50%)
+2. Identifique 5-7 pontos específicos para melhoria
+3. Avalie comunicação, postura, confiança e preparação
+4. Considere dados comportamentais e qualidade das respostas
+5. Seja construtivo mas realista, seguindo padrões de RH profissional
 
-### 3. ANÁLISE COMPORTAMENTAL
-- Engajamento durante a entrevista
-- Linguagem corporal e contato visual
-- Confiança e apresentação pessoal
-- Consistência nas respostas
+FORMATO DE RESPOSTA (JSON):
+{
+  "overallScore": [0-50],
+  "scoreBreakdown": {
+    "behavioralAssessment": [0-10],
+    "technicalCompetence": [0-10],
+    "culturalFit": [0-10],
+    "communication": [0-10],
+    "videoPresence": [0-10]
+  },
+  "discProfile": "Perfil comportamental identificado (D/I/S/C)",
+  "strengths": [
+    "Força identificada 1",
+    "Força identificada 2"
+  ],
+  "improvementPoints": [
+    "Ponto específico para melhoria 1",
+    "Ponto específico para melhoria 2",
+    "Ponto específico para melhoria 3",
+    "Ponto específico para melhoria 4",
+    "Ponto específico para melhoria 5"
+  ],
+  "behavioralInsights": [
+    "Insight comportamental baseado em DISC/Big Five",
+    "Avaliação de inteligência emocional",
+    "Análise de fit cultural"
+  ],
+  "technicalAssessment": [
+    "Avaliação das competências técnicas",
+    "Qualidade das explicações técnicas"
+  ],
+  "recommendations": [
+    "Recomendação específica 1",
+    "Recomendação específica 2",
+    "Recomendação específica 3"
+  ],
+  "hiringRecommendation": "Recomendação final sobre contratação",
+  "mentorshipRecommendation": "Razão específica pela qual mentoria ajudaria este candidato"
+}
 
-### 4. COMPETÊNCIAS AVALIADAS
-Para cada competência, forneça uma nota de 1-10 e justificativa:
-- Conhecimento Técnico
-- Comunicação
-- Resolução de Problemas
-- Adaptabilidade
-- Trabalho em Equipe
-- Liderança (se aplicável)
+Responda APENAS com o JSON válido, sem explicações adicionais.
+`;
 
-### 5. FEEDBACK DETALHADO
-- Análise pergunta por pergunta
-- Pontos específicos de cada resposta
-- Sugestões de melhoria
-
-### 6. COMPARAÇÃO COM PERFIL DESEJADO
-- Alinhamento com a vaga/área de especialização
-- Gaps identificados
-- Potencial de desenvolvimento
-
-### 7. PRÓXIMOS PASSOS
-- Recomendações específicas
-- Áreas para aprofundar em próximas etapas
-- Sugestões de desenvolvimento
-
-Por favor, formate a resposta em JSON estruturado para facilitar o processamento e exibição dos resultados.
-    `;
+return prompt;
   }
 
-  // Analisar entrevista usando Gemini
-  async analyzeInterview(interviewData, responsesData) {
+  parseGeminiResponse(responseText) {
     try {
-      console.log('🤖 Iniciando análise com Gemini...');
-      
-      if (!this.isConfigured()) {
-        throw new Error('Serviço Gemini não está configurado. Verifique a API Key.');
-      }
-
-      // Preparar dados
-      const analysisData = this.prepareInterviewDataForAnalysis(interviewData, responsesData);
-      
-      // Criar prompt
-      const prompt = this.createAnalysisPrompt(analysisData);
-      
-      console.log('📤 Enviando dados para análise...');
-      
-      // Realizar análise
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const analysisText = response.text();
-      
-      console.log('✅ Análise concluída com sucesso');
-      
-      // Tentar parsear como JSON, se falhar, retornar como texto
-      let parsedAnalysis;
-      try {
-        parsedAnalysis = JSON.parse(analysisText);
-      } catch (parseError) {
-        console.warn('⚠️ Resposta não está em JSON, retornando como texto estruturado');
-        parsedAnalysis = {
-          rawAnalysis: analysisText,
-          type: 'text',
-          generatedAt: new Date().toISOString()
+      // Tentar extrair JSON da resposta
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[0];
+        const parsed = JSON.parse(jsonStr);
+        
+        // Validar estrutura e limitar pontuação
+        return {
+          overallScore: Math.min(parsed.overallScore || 0, 50),
+          scoreBreakdown: {
+            communication: Math.min(parsed.scoreBreakdown?.communication || 0, 10),
+            confidence: Math.min(parsed.scoreBreakdown?.confidence || 0, 10),
+            preparation: Math.min(parsed.scoreBreakdown?.preparation || 0, 10),
+            engagement: Math.min(parsed.scoreBreakdown?.engagement || 0, 10),
+            eyeContact: Math.min(parsed.scoreBreakdown?.eyeContact || 0, 10)
+          },
+          strengths: parsed.strengths || [],
+          improvementPoints: parsed.improvementPoints || [],
+          behavioralInsights: parsed.behavioralInsights || [],
+          recommendations: parsed.recommendations || [],
+          mentorshipRecommendation: parsed.mentorshipRecommendation || ''
         };
       }
-
-      // Adicionar metadados
-      const finalAnalysis = {
-        ...parsedAnalysis,
-        metadata: {
-          interviewId: interviewData.interview.id,
-          candidateName: analysisData.candidate.name,
-          analyzedAt: new Date().toISOString(),
-          totalQuestions: analysisData.interview.totalQuestions,
-          completedQuestions: analysisData.interview.completedQuestions,
-          interviewDuration: analysisData.interview.duration,
-          behaviorDataPoints: analysisData.metadata.totalBehaviorDataPoints || 0,
-          avgEngagement: analysisData.metadata.avgEngagement || 0,
-          avgEyeContact: analysisData.metadata.avgEyeContact || 0
-        }
-      };
-
-      return {
-        success: true,
-        analysis: finalAnalysis,
-        message: 'Análise realizada com sucesso'
-      };
-
-    } catch (error) {
-      console.error('❌ Erro na análise com Gemini:', error);
-      return {
-        success: false,
-        error: error.message,
-        message: 'Erro ao analisar entrevista'
-      };
-    }
-  }
-
-  // Análise simplificada para casos de erro ou fallback
-  createFallbackAnalysis(interviewData, responsesData) {
-    const { interview } = interviewData;
-    const responses = responsesData[0] || {};
-    
-    const completionRate = interview.totalQuestions > 0 
-      ? Math.round((interview.completedQuestions / interview.totalQuestions) * 100) 
-      : 0;
-    
-    const durationMinutes = Math.round(interview.duration / 60);
-    
-    return {
-      type: 'fallback',
-      summary: {
-        candidateName: interview.userName,
-        completionRate: completionRate,
-        duration: durationMinutes,
-        totalQuestions: interview.totalQuestions,
-        status: interview.status
-      },
-      basicMetrics: {
-        avgEngagement: responses.analysisMetadata?.avgEngagement || 0,
-        avgEyeContact: responses.analysisMetadata?.avgEyeContact || 0,
-        behaviorDataPoints: responses.analysisMetadata?.totalBehaviorDataPoints || 0
-      },
-      recommendation: completionRate >= 80 ? 'Entrevista concluída com sucesso' : 'Entrevista incompleta',
-      message: 'Análise básica gerada (serviço de IA indisponível)',
-      generatedAt: new Date().toISOString()
-    };
-  }
-
-  // Analisar com fallback
-  async analyzeInterviewWithFallback(interviewData, responsesData) {
-    try {
-      // Tentar análise completa com Gemini
-      const result = await this.analyzeInterview(interviewData, responsesData);
       
-      if (result.success) {
-        return result;
-      }
-      
-      // Se falhar, usar análise básica
-      console.log('🔄 Usando análise básica como fallback...');
-      const fallbackAnalysis = this.createFallbackAnalysis(interviewData, responsesData);
-      
-      return {
-        success: true,
-        analysis: fallbackAnalysis,
-        message: 'Análise básica gerada (serviço de IA indisponível)',
-        fallback: true
-      };
+      throw new Error('JSON não encontrado na resposta');
       
     } catch (error) {
-      console.error('❌ Erro em análise com fallback:', error);
-      
-      // Último recurso - análise muito básica
-      const emergencyAnalysis = {
-        type: 'emergency',
-        message: 'Erro na análise. Dados básicos da entrevista disponíveis.',
-        basicData: {
-          interviewId: interviewData.interview.id,
-          candidateName: interviewData.interview.userName,
-          status: interviewData.interview.status,
-          totalQuestions: interviewData.interview.totalQuestions,
-          completedQuestions: interviewData.interview.completedQuestions
-        },
-        error: error.message,
-        generatedAt: new Date().toISOString()
-      };
-      
-      return {
-        success: false,
-        analysis: emergencyAnalysis,
-        message: 'Erro na análise da entrevista',
-        error: error.message
-      };
+      console.error('❌ Erro ao parsear resposta do Gemini:', error);
+      return this.getFallbackAnalysis();
     }
   }
 
-  // Gerar relatório em PDF (preparar dados)
-  preparePDFData(analysis) {
+  getFallbackAnalysis() {
     return {
-      title: `Relatório de Análise - ${analysis.metadata?.candidateName || 'Candidato'}`,
-      date: new Date().toLocaleDateString('pt-BR'),
-      analysis: analysis,
-      sections: [
-        'Resumo Executivo',
-        'Análise Técnica',
-        'Análise Comportamental',
-        'Competências Avaliadas',
-        'Feedback Detalhado',
-        'Recomendações'
-      ]
+      overallScore: 25,
+      scoreBreakdown: {
+        communication: 5,
+        confidence: 5,
+        preparation: 5,
+        engagement: 5,
+        eyeContact: 5
+      },
+      strengths: [
+        "Participou da entrevista completa",
+        "Demonstrou interesse na oportunidade"
+      ],
+      improvementPoints: [
+        "Melhorar clareza na comunicação verbal",
+        "Desenvolver confiança na apresentação pessoal",
+        "Preparar respostas mais estruturadas",
+        "Praticar contato visual consistente",
+        "Desenvolver exemplos específicos de experiências"
+      ],
+      behavioralInsights: [
+        "Análise comportamental limitada devido a dados insuficientes",
+        "Recomenda-se sessões de prática para melhorar naturalidade"
+      ],
+      recommendations: [
+        "Praticar entrevistas simuladas",
+        "Estudar técnicas de comunicação eficaz",
+        "Buscar feedback de profissionais experientes"
+      ],
+      mentorshipRecommendation: "A mentoria ajudará a desenvolver confiança e técnicas específicas de apresentação profissional"
     };
-  }
-
-  // Validar dados antes da análise
-  validateAnalysisData(interviewData, responsesData) {
-    const errors = [];
-    
-    if (!interviewData || !interviewData.interview) {
-      errors.push('Dados da entrevista não encontrados');
-    }
-    
-    if (!responsesData || !Array.isArray(responsesData) || responsesData.length === 0) {
-      errors.push('Dados de respostas não encontrados');
-    }
-    
-    if (interviewData && interviewData.interview && interviewData.interview.completedQuestions === 0) {
-      errors.push('Nenhuma pergunta foi respondida');
-    }
-    
-    return errors;
   }
 }
 
-// Exportar instância única
 export default new GeminiAnalysisService();

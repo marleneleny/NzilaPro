@@ -41,7 +41,7 @@ const mockFirestoreService = {
       data: {
         interview: {
           id: id,
-          userSpecialization: "Desenvolvedor Full Stack",
+          userSpecialization: "Desenvolvedor Web",
           createdAt: new Date().toISOString(),
           completedQuestions: 8,
           totalQuestions: 10,
@@ -125,7 +125,7 @@ export default function Resultado({
   // Função para gerar score baixo aleatório
   const generateLowRandomScore = useCallback(() => {
     // Gera números entre 15 e 49
-    return Math.floor(Math.random() * 15) + 15;
+    return Math.floor(Math.random() * 8) + 8;
   }, []);
 
   // Função para carregar dados do Firestore
@@ -213,7 +213,7 @@ export default function Resultado({
     };
 
     // Garante que a soma dos fatores resulte no score baixo desejado
-    const currentTotal = Object.values(factors).reduce((acc, val) => acc + val, 0) * 100;
+    const currentTotal = Object.values(factors).reduce((acc, val) => acc + val, 0) * 120;
     const adjustmentFactor = randomLowScore / currentTotal;
     
     Object.keys(factors).forEach(key => {
@@ -362,8 +362,16 @@ export default function Resultado({
     
     return [
       {
-        label: "Qualidade das Respostas",
-        value: Math.round((factors?.responseQuality || 0) * 250),
+        label: "Qualidade das Respostas técnicas",
+        value: Math.round((factors?.responseQuality || 0) * 0),
+        maxValue: 100,
+        color: "bg-blue-500",
+        icon: MessageCircle,
+        description: "Profundidade e clareza das respostas"
+      },
+      {
+        label: "Qualidade das Respostas Comportamentais",
+        value: Math.round((factors?.responseQuality || 0) * 0),
         maxValue: 100,
         color: "bg-blue-500",
         icon: MessageCircle,
@@ -371,27 +379,19 @@ export default function Resultado({
       },
       {
         label: "Análise Comportamental",
-        value: Math.round((factors?.behaviorAnalysis || 0) * 400),
-        maxValue: 100,
+        value: Math.round((factors?.behaviorAnalysis || 0) * 270),
+        maxValue: 800,
         color: "bg-green-500",
         icon: Activity,
         description: "Postura e engajamento durante a entrevista"
       },
       {
         label: "Contato Visual",
-        value: Math.round((factors?.eyeContact || 0) * 667),
+        value: Math.round((factors?.eyeContact || 0) * 580),
         maxValue: 100,
         color: "bg-purple-500",
         icon: Eye,
         description: "Conexão visual com o entrevistador"
-      },
-      {
-        label: "Engajamento",
-        value: Math.round((factors?.engagement || 0) * 1000),
-        maxValue: 100,
-        color: "bg-yellow-500",  
-        icon: Zap,
-        description: "Nível de participação e interesse"
       },
       {
         label: "Gestão de Tempo",
@@ -423,25 +423,7 @@ export default function Resultado({
     );
   }
 
-  // Renderizar erro
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Erro ao Carregar Dados</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
-          <button
-            onClick={retryLoad}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-all flex items-center space-x-2 mx-auto"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Tentar Novamente</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
+  
 
   const PerformanceIcon = performanceLevel?.icon || Activity;
 
@@ -645,103 +627,11 @@ export default function Resultado({
                 ))}
               </div>
               
-              {/* Gráfico de evolução temporal se houver dados */}
-              {behaviorData.length > 0 && (
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-600/50">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <Activity className="w-5 h-5 text-green-400 mr-2" />
-                    Evolução Durante a Entrevista
-                  </h4>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-300 text-sm">Engajamento Médio</span>
-                        <span className="text-white font-medium">
-                          {Math.round(behaviorData.reduce((acc, b) => acc + ((b?.engagement?.score) || 0), 0) / behaviorData.length * 100)}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-1000"
-                          style={{ width: `${Math.round(behaviorData.reduce((acc, b) => acc + ((b?.engagement?.score) || 0), 0) / behaviorData.length * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-300 text-sm">Contato Visual Médio</span>
-                        <span className="text-white font-medium">
-                          {Math.round(behaviorData.reduce((acc, b) => acc + ((b?.eyeContact?.score) || 0), 0) / behaviorData.length * 100)}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-1000"
-                          style={{ width: `${Math.round(behaviorData.reduce((acc, b) => acc + ((b?.eyeContact?.score) || 0), 0) / behaviorData.length * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+             
             </div>
           )}
         </div>
 
-        {/* Análise do CV se disponível */}
-        {cvAnalysis && (
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 mb-8 border border-gray-700">
-            <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
-              <FileText className="w-6 h-6 text-green-400 mr-3" />
-              Análise do Currículo
-            </h3>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-green-900/20 rounded-xl p-6 border border-green-500/30">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold text-white">Score do CV</h4>
-                  <span className="text-3xl font-bold text-green-400">{cvAnalysis.score}%</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-1000"
-                    style={{ width: `${cvAnalysis.score}%` }}
-                  />
-                </div>
-              </div>
-              
-              <div className="bg-blue-900/20 rounded-xl p-6 border border-blue-500/30">
-                <h4 className="font-semibold text-white mb-3 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-blue-400 mr-2" />
-                  Pontos Fortes
-                </h4>
-                <div className="space-y-2">
-                  {cvAnalysis.strengths?.slice(0, 3).map((strength, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <span className="text-gray-300 text-sm">{strength}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="bg-yellow-900/20 rounded-xl p-6 border border-yellow-500/30">
-                <h4 className="font-semibold text-white mb-3 flex items-center">
-                  <TrendingUp className="w-5 h-5 text-yellow-400 mr-2" />
-                  Áreas para Melhorar
-                </h4>
-                <div className="space-y-2">
-                  {cvAnalysis.improvements?.slice(0, 3).map((improvement, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <span className="text-gray-300 text-sm">{improvement}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Recomendações Personalizadas */}
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 mb-8 border border-gray-700">

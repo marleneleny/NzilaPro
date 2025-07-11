@@ -12,13 +12,14 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
   const [validationResult, setValidationResult] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Função melhorada para validar se é um CV válido
   const validateCV = async (file) => {
     setIsValidating(true);
     setValidationResult(null);
+
 
     // Simular processo de validação
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -61,70 +62,18 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     // 1. PRIMEIRA VERIFICAÇÃO: Indicadores NEGATIVOS CRÍTICOS (rejeição automática)
     const criticalNegativeIndicators = [
       // Livros e literatura
-      "livro",
-      "book",
-      "ebook",
-      "romance",
-      "historia",
-      "história",
-      "contos",
-      "conto",
-      "sonhos",
-      "disciplina",
-      "desenvolvimento pessoal",
-      "autoajuda",
-      "auto-ajuda",
-      "motivação",
-      "motivacao",
-      "inspiração",
-      "inspiracao",
-      "reflexões",
-      "reflexoes",
-      "pensamentos",
-      "filosofia",
-      "espiritualidade",
-
+      "livro", "book", "ebook", "romance", "historia", "história", "contos", "conto", "sonhos", 
+      "disciplina", "desenvolvimento pessoal", "autoajuda", "auto-ajuda", "motivação", "motivacao",
+      "inspiração", "inspiracao", "reflexões", "reflexoes", "pensamentos", "filosofia", "espiritualidade","augusto",
       // Documentos acadêmicos/técnicos (exceto tese/dissertação que podem ser parte do CV)
-      "manual",
-      "tutorial",
-      "artigo",
-      "article",
-      "paper",
-      "monografia",
-      "pesquisa",
-      "estudo",
-
+      "manual", "tutorial", "artigo", "article", "paper", "monografia", "pesquisa", "estudo","verb",
       // Documentos comerciais
-      "relatório",
-      "relatorio",
-      "report",
-      "apresentação",
-      "apresentacao",
-      "slides",
-      "powerpoint",
-      "ppt",
-      "planilha",
-      "excel",
-      "contrato",
-      "contract",
-      "invoice",
-      "fatura",
-      "receipt",
-      "comprovante",
-      "catalogo",
-      "catálogo",
-
+      "relatório", "relatorio", "report", "apresentação", "apresentacao", "slides", "powerpoint", "ppt",
+      "planilha", "excel", "contrato", "contract", "invoice", "fatura", "receipt", "comprovante",
+      "catalogo", "catálogo",
       // Mídia e entretenimento
-      "revista",
-      "magazine",
-      "brochure",
-      "folheto",
-      "panfleto",
-      "guia",
-      "receitas",
-      "cookbook",
-      "cardápio",
-      "cardapio",
+      "revista", "magazine", "brochure", "folheto", "panfleto", "guia", "receitas", "cookbook",
+      "cardápio", "cardapio",
     ];
 
     const hasCriticalNegative = criticalNegativeIndicators.some((indicator) =>
@@ -137,7 +86,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       );
       setValidationResult({
         isValid: false,
-        message: `Este arquivo parece ser um "${matchedIndicator}" e não um currículo profissional. Por favor, envie seu CV pessoal.`,
+        message: `Este arquivo parece ser um outro arquivo e não um currículo profissional. Por favor, envie seu CV pessoal.`,
       });
       setIsValidating(false);
       return;
@@ -145,77 +94,24 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
 
     // 2. INDICADORES POSITIVOS FORTES (alta confiança de ser CV)
     const strongCVIndicators = [
-      "cv",
-      "curriculo",
-      "currículo",
-      "resume",
-      "curriculum",
+      "cv", "curriculo", "currículo", "resume", "curriculum",
     ];
 
     // 3. INDICADORES POSITIVOS MODERADOS (profissionais e técnicos)
     const moderateCVIndicators = [
-      "profissional",
-      "professional",
-      "experiencia",
-      "experiência",
-      "experience",
-      "qualificacao",
-      "qualificação",
-      "qualification",
-      "habilidades",
-      "skills",
-      "competencias",
-      "competências",
-      "carreira",
-      "career",
-
+      "profissional", "professional", "experiencia", "experiência", "experience",
+      "qualificacao", "qualificação", "qualification", "habilidades", "skills",
+      "competencias", "competências", "carreira", "career",
       // Áreas técnicas e profissionais
-      "frontend",
-      "backend",
-      "fullstack",
-      "developer",
-      "programador",
-      "analista",
-      "engenheiro",
-      "designer",
-      "marketing",
-      "vendas",
-      "gestao",
-      "gestão",
-      "administrador",
-      "coordenador",
-      "gerente",
-      "supervisor",
-      "diretor",
-
+      "frontend", "backend", "fullstack", "developer", "programador", "analista",
+      "engenheiro", "designer", "marketing", "vendas", "gestao", "gestão",
+      "administrador", "coordenador", "gerente", "supervisor", "diretor",
       // Áreas específicas
-      "ti",
-      "rh",
-      "financeiro",
-      "comercial",
-      "administrativo",
-      "juridico",
-      "jurídico",
-      "contabil",
-      "contábil",
-      "educacao",
-      "educação",
-      "saude",
-      "saúde",
-
+      "ti", "rh", "financeiro", "comercial", "administrativo", "juridico", "jurídico",
+      "contabil", "contábil", "educacao", "educação", "saude", "saúde",
       // Formação acadêmica comum em CVs
-      "formacao",
-      "formação",
-      "educacao",
-      "educação",
-      "diploma",
-      "certificado",
-      "tese",
-      "thesis",
-      "dissertação",
-      "dissertacao",
-      "mestrado",
-      "doutorado",
+      "formacao", "formação", "educacao", "educação", "diploma", "certificado",
+      "tese", "thesis", "dissertação", "dissertacao", "mestrado", "doutorado",
     ];
 
     // Verificar indicadores fortes de CV
@@ -223,7 +119,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       fileName.includes(indicator)
     );
     if (hasStrongCV) {
-      cvScore += 60; // Aumentado de 50 para 60
+      cvScore += 60;
       hasPositiveIndicator = true;
     }
 
@@ -232,7 +128,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       fileName.includes(indicator)
     );
     if (hasModerateCV) {
-      cvScore += 30; // Aumentado de 25 para 30
+      cvScore += 30;
       hasPositiveIndicator = true;
     }
 
@@ -240,7 +136,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     const namePattern =
       /\b[a-z]{2,}\s+[a-z]{2,}|[a-z]+_[a-z]+(?:_cv|_curriculo|_resume)?|(?:cv|curriculo|resume)_[a-z]+/i;
     if (namePattern.test(fileName)) {
-      cvScore += 25; // Aumentado de 20 para 25
+      cvScore += 25;
       hasPositiveIndicator = true;
     }
 
@@ -250,7 +146,6 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       const possiblePersonalName =
         /^[a-z]+(?:[-_\s][a-z]+)*\.(?:pdf|docx?|doc)$/i.test(fileName);
       if (possiblePersonalName && Math.random() > 0.5) {
-        // 50% de chance
         cvScore += 15;
         hasPositiveIndicator = true;
       } else {
@@ -264,84 +159,58 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
       }
     }
 
-    // 6. Nomes muito genéricos são suspeitos (penalização reduzida)
+    // 6. Nomes muito genéricos são suspeitos
     const genericNames = [
-      "documento",
-      "document",
-      "arquivo",
-      "file",
-      "texto",
-      "text",
-      "untitled",
-      "sem titulo",
-      "novo",
-      "new",
-      "temp",
-      "temporario",
-      "download",
-      "anexo",
-      "attachment",
+      "documento", "document", "arquivo", "file", "texto", "text", "untitled",
+      "sem titulo", "novo", "new", "temp", "temporario", "download", "anexo", "attachment",
     ];
     const hasGenericName = genericNames.some((generic) =>
       fileName.includes(generic)
     );
     if (hasGenericName) {
-      cvScore -= 20; // Reduzido de 30 para 20
+      cvScore -= 20;
       rejectionReasons.push("Nome muito genérico para um CV");
     }
 
     // 7. Análise de tamanho mais flexível
     if (fileSize < 20 * 1024) {
-      // Reduzido de 30KB para 20KB
-      cvScore -= 30; // Reduzido de 40 para 30
+      cvScore -= 30;
       rejectionReasons.push("Arquivo muito pequeno para um CV (menos de 20KB)");
     } else if (fileSize >= 20 * 1024 && fileSize <= 3 * 1024 * 1024) {
-      // Aumentado limite para 3MB
-      cvScore += 20; // Aumentado de 15 para 20
+      cvScore += 20;
     } else if (fileSize > 3 * 1024 * 1024) {
-      cvScore -= 15; // Reduzido de 25 para 15
-      rejectionReasons.push(
-        "Arquivo muito grande para um CV típico (mais de 3MB)"
-      );
+      cvScore -= 15;
+      rejectionReasons.push("Arquivo muito grande para um CV típico (mais de 3MB)");
     }
 
-    // 8. Extensões inadequadas (penalização reduzida)
+    // 8. Extensões inadequadas
     if (fileName.endsWith(".txt")) {
-      cvScore -= 30; // Reduzido de 40 para 30
+      cvScore -= 30;
       rejectionReasons.push("Formato .txt é inadequado para CV profissional");
     }
 
-    // DECISÃO FINAL com critérios mais flexíveis
+    // DECISÃO FINAL
     let isLikelyCV = false;
     let validationMessage = "";
 
     console.log(`Score do arquivo "${fileName}": ${cvScore}`);
 
     if (cvScore >= 35) {
-      // Reduzido de 40 para 35
       isLikelyCV = true;
-      validationMessage =
-        "Currículo válido! Documento identificado como CV profissional.";
+      validationMessage = "Currículo válido! Documento identificado como CV profissional.";
     } else if (cvScore >= 15 && hasPositiveIndicator) {
-      // Reduzido de 20 para 15
-      // Zona de incerteza - mais permissiva
       if (Math.random() > 0.3) {
-        // 70% chance de aceitar (era 40%)
         isLikelyCV = true;
-        validationMessage =
-          "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
+        validationMessage = "Documento aceito como currículo. Verifique se contém todas suas informações profissionais.";
       } else {
         isLikelyCV = false;
-        validationMessage =
-          "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
+        validationMessage = "Este arquivo pode não ser um currículo completo. Certifique-se de que contém experiência, formação e dados de contato.";
       }
     } else {
-      // Rejeição
       isLikelyCV = false;
-      const reasons =
-        rejectionReasons.length > 0
-          ? rejectionReasons.join(". ")
-          : "Arquivo não identificado como currículo profissional";
+      const reasons = rejectionReasons.length > 0
+        ? rejectionReasons.join(". ")
+        : "Arquivo não identificado como currículo profissional";
       validationMessage = `${reasons}. Por favor, envie um arquivo com nome indicativo de CV (ex: MeuCV.pdf, Curriculo_Nome.pdf).`;
     }
 
@@ -358,7 +227,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setValidationResult(null);
     setUploadProgress(0);
 
-    // Simular upload
+    // Simular upload visual
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 100) {
@@ -390,27 +259,79 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     setIsDragging(false);
   };
 
-  const handleSave = async () => {
-    if (validationResult?.isValid && file) {
-      setIsSaving(true);
-      try {
-        await onSave(file);
-      } finally {
-        setIsSaving(false);
+const handleSave = async () => {
+  if (validationResult?.isValid && file) {
+    setIsSaving(true);
+    try {
+      console.log("Iniciando upload do CV:", file.name);
+      
+      // Upload real para Cloudinary
+      const uploadedCV = await uploadDocument(file);
+      console.log("CV uploaded para Cloudinary:", uploadedCV);
+      
+      // Validar se o upload foi bem-sucedido
+      if (!uploadedCV.url || !uploadedCV.publicId) {
+        throw new Error("Upload incompleto - URL ou publicId não retornados");
       }
+      
+      // Extrair área e foco
+      const detectedArea = extractAreaFromCV(file.name);
+      const detectedFocus = extractFocusFromCV(file.name, "", detectedArea);
+      
+      // Preparar dados do CV
+      const cvData = {
+        fileName: file.name,
+        url: uploadedCV.url,
+        publicId: uploadedCV.publicId,
+        area: detectedArea,
+        focus: detectedFocus,
+        uploadDate: new Date().toISOString(),
+        fileSize: file.size,
+        fileType: file.type,
+        // Dados adicionais do Cloudinary (opcional)
+        originalName: uploadedCV.originalName,
+        format: uploadedCV.format
+      };
+      
+      console.log("Dados do CV preparados:", cvData);
+      
+      // Validar cvData antes de salvar
+      if (!cvData.url || !cvData.publicId) {
+        throw new Error("Dados do CV inválidos - URL ou publicId ausentes");
+      }
+      
+      // Chamar função de save do componente pai
+      await onSave(cvData);
+      
+    } catch (error) {
+      console.error("Erro ao fazer upload do CV:", error);
+      
+      // Mensagem de erro mais específica
+      if (error.message.includes("Upload incompleto")) {
+        alert("Erro no upload: Dados incompletos retornados do servidor. Tente novamente.");
+      } else if (error.message.includes("Dados do CV inválidos")) {
+        alert("Erro na preparação dos dados do CV. Tente novamente.");
+      } else {
+        alert("Erro ao fazer upload do currículo. Verifique sua conexão e tente novamente.");
+      }
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }
+};
+
 
   const resetModal = () => {
     setFile(null);
     setValidationResult(null);
     setUploadProgress(0);
     setIsValidating(false);
-    setIsSaving(false); // Adicione esta linha
+    setIsSaving(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+  
   const handleClose = () => {
     resetModal();
     onClose();
@@ -435,7 +356,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
 
         <p className="text-gray-600 mb-6 text-sm">
           Para acessar as candidaturas, primeiro você precisa enviar seu
-          currículo.
+          currículo. Iremos analisar automaticamente sua área de atuação.
         </p>
 
         {/* Área de Upload */}
@@ -501,7 +422,7 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
             <div className="flex items-center space-x-2">
               <div className="animate-spin w-4 h-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
               <span className="text-sm text-yellow-800">
-                Validando currículo...
+                Analisando currículo e identificando área de atuação...
               </span>
             </div>
           </div>
@@ -563,7 +484,6 @@ const CVUploadModal = ({ isOpen, onClose, onSave }) => {
     </div>
   );
 };
-
 export default function NavBar() {
   const { User } = useAuth();
   const [userAvatar, setUserAvatar] = useState(null);
@@ -611,8 +531,8 @@ export default function NavBar() {
   }, []);
 
   const isAuthenticated = () => {
-    return User && (User.uid || User.id);
-  };
+  return User && getUserId(); // ✅ Usar getUserId() em vez de verificação manual
+};
 
   const handleImageError = (e) => {
     console.log("Navbar image failed to load, using default avatar");
@@ -624,41 +544,113 @@ export default function NavBar() {
     console.log("Navbar image loaded successfully:", e.target.src);
   };
 
-  const handleCandidaturasClick = (e) => {
-    e.preventDefault(); // Impede navegação automática
+const handleCandidaturasClick = (e) => {
+  e.preventDefault();
 
-    if (!userCV) {
-      setShowUploadModal(true);
-    } else {
-      navigate("/candidaturas");
+  if (!isAuthenticated()) {
+    // Redirecionar para login se não autenticado
+    navigate("/login");
+    return;
+  }
+
+  if (!userCV) {
+    setShowUploadModal(true);
+  } else {
+    navigate("/candidaturas");
+  }
+};
+
+  const getUserId = () => {
+  // Prioridade 1: ID do contexto (User.id)
+  if (User?.id) return User.id;
+  
+  // Prioridade 2: UID do Firebase Auth (do contexto)
+  if (User?.uid) return User.uid;
+  
+  // Prioridade 3: UID do auth.currentUser (fallback)
+  if (auth.currentUser?.uid) return auth.currentUser.uid;
+  
+  return null;
+};
+
+const loadUserCV = () => {
+  try {
+    const userId = getUserId();
+    
+    if (userId) {
+      // ✅ Usar chave específica do usuário
+      const userSpecificCV = localStorage.getItem(`userCV_${userId}`);
+      if (userSpecificCV) {
+        console.log("CV carregado do NavBar para usuário:", userId);
+        return JSON.parse(userSpecificCV);
+      }
     }
-  };
+    
+    // ✅ REMOVER fallback para chave geral
+    // const savedCV = localStorage.getItem("userCV");
+    // if (savedCV) {
+    //   return JSON.parse(savedCV);
+    // }
+  } catch (error) {
+    console.error("Erro ao carregar CV no NavBar:", error);
+  }
+  return null;
+};
 
-  const handleCVSave = (file) => {
-    console.log("CV salvo:", file);
+useEffect(() => {
+  if (User && getUserId()) {
+    // 1. Primeiro tentar carregar do contexto do usuário
+    if (User.cvData) {
+      console.log("CV carregado do contexto do usuário:", User.cvData);
+      setUserCV(User.cvData);
+      return;
+    }
+    
+    // 2. Se não, tentar carregar do localStorage específico
+    const savedCV = loadUserCV();
+    if (savedCV) {
+      setUserCV(savedCV);
+    } else {
+      setUserCV(null); // ✅ Limpar se não encontrar CV
+    }
+  } else {
+    // ✅ Limpar CV quando não há usuário autenticado
+    setUserCV(null);
+  }
+}, [User, User?.cvData]); // ✅ Adicionar User.cvData como dependência
 
-    // Criar dados do CV para salvar
-    const cvData = {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      uploadDate: new Date().toISOString(),
-      // Aqui você pode adicionar mais campos conforme necessário
-    };
 
-    // Atualizar estado e localStorage
+const handleCVSave = (cvData) => {
+  console.log("CV salvo no NavBar:", cvData);
+
+  const userId = getUserId();
+  if (!userId) {
+    console.error("Usuário não autenticado para salvar CV");
+    return;
+  }
+
+  // ✅ Salvar apenas com chave específica do usuário
+  try {
+    localStorage.setItem(`userCV_${userId}`, JSON.stringify(cvData));
+    console.log("CV salvo no localStorage para usuário:", userId);
+    
+    // ✅ REMOVER salvamento na chave geral
+    // localStorage.setItem("userCV", JSON.stringify(cvData));
+    
+    // Atualizar estado
     setUserCV(cvData);
-    localStorage.setItem("userCV", JSON.stringify(cvData));
-
+    
     // Fechar modal
     setShowUploadModal(false);
-
-    // Navegar diretamente para candidaturas
+    
+    // Navegar para candidaturas
     navigate("/candidaturas");
+  } catch (error) {
+    console.error("Erro ao salvar CV no NavBar:", error);
+  }
+};
 
-    // Aqui você pode implementar a lógica para enviar o arquivo para o servidor
-    // Por exemplo: uploadCVToServer(file, cvData)
-  };
+
 
   return (
     <>

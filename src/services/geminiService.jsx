@@ -112,7 +112,7 @@ class GeminiCVAnalyzer {
 
   // Build prompt based only on area - Simplified and more reliable
   buildPrompt(userProfile) {
-    const area = userProfile?.area || userProfile?.specialization || 'Tecnologia';
+    const area = userProfile?.focus || userProfile?.specialization || 'Tecnologia';
     const name = userProfile?.fullName || userProfile?.name || 'Candidato';
     
     return `Você é um especialista em recrutamento. Gere 10 perguntas para entrevista de emprego na área de ${area}.
