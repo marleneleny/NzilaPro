@@ -9,7 +9,28 @@ export function AuthContextProvider({ children }) {
   const [User, SetUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [disabledItems, setDisabledItems] = useState([]);
 
+const disableItem = (itemId) => {
+    setDisabledItems(prev => {
+      if (!prev.includes(itemId)) {
+        return [...prev, itemId];
+      }
+      return prev;
+    });
+  };
+
+  const enableItem = (itemId) => {
+    setDisabledItems(prev => prev.filter(id => id !== itemId));
+  };
+
+  const isItemDisabled = (itemId) => {
+    return disabledItems.includes(itemId);
+  };
+
+  const clearAllDisabledItems = () => {
+    setDisabledItems([]);
+  };
   // Initialize auth state on app load
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -139,9 +160,15 @@ export function AuthContextProvider({ children }) {
     updateUser,
     
     // Utility functions
-    hasRole
-  };
+    hasRole,
 
+    // ADICIONAR ESTAS LINHAS - Novas funções no contextValue
+    disabledItems,
+    disableItem,
+    enableItem,
+    isItemDisabled,
+    clearAllDisabledItems
+  };
   // Mostrar loading enquanto verifica autenticação
   if (loading) {
     return (

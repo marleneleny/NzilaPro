@@ -897,12 +897,7 @@ Nzila | Plataforma de Recrutamento e Desenvolvimento Profissional`);
                               <Briefcase size={14} />
                               <span>{candidate.area || "Tecnologia"}</span>
                             </div>
-                            <div className="flex items-center space-x-1">
-                              <Calendar size={14} />
-                              <span>
-                                Registrado em {formatDate(candidate.createdAt)}
-                              </span>
-                            </div>
+                            
                             {/* Indicador de CV */}
                             <div className="flex items-center space-x-1">
                               <FileText size={14} />

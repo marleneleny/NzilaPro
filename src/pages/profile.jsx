@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage, auth } from "../services/firebase"; // Caminho corrigido
-import defaultImage from "../assets/default.svg";
+import { db, auth } from "../services/firebase"; // Caminho corrigido
 import useAuth from "../hooks/useAuth";
 import Navbar from "../componentes/Navbar";
 import NzilaFooter from "../componentes/NzilaFooter";
@@ -23,26 +21,6 @@ import {
   deleteDocument,
 } from "../services/cloudinary"; 
 import { useNavigate } from "react-router-dom";
-
-// Função para extrair área de atuação do CV
-const extractAreaFromCV = (fileName) => {
-  // Sua lógica de extração aqui
-  return "Área de atuação";
-};
-
-const extractFocusFromCV = (fileName, content, area) => {
-  // Sua lógica de extração aqui
-  return "Foco detectado";
-};
-
-// Funções de localStorage
-const saveCVToStorage = (cvData) => {
-  localStorage.setItem('userCV', JSON.stringify(cvData));
-};
-
-const removeCVFromStorage = () => {
-  localStorage.removeItem('userCV');
-};
 
 // ========================================
 // COMPONENTE PRINCIPAL PROFILE

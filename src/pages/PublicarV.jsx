@@ -439,7 +439,7 @@ export default function PublicarV() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-2">
-                    Salário
+                    Média Salarial
                   </label>
                   <div className="flex gap-2">
                     <input

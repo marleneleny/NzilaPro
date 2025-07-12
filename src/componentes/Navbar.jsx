@@ -4,6 +4,9 @@ import logo from "../assets/logo.svg";
 import notificacao from "../assets/notificacao.svg";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+
 
 // Modal de Upload de CV Melhorado
 const CVUploadModal = ({ isOpen, onClose, onSave }) => {
@@ -491,6 +494,8 @@ export default function NavBar() {
   const [userCV, setUserCV] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  const { isItemDisabled } = useContext(AuthContext);
+
 
   const defaultAvatar =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999999'%3E%3Cpath d='M12 4c1.93 0 3.5 1.57 3.5 3.5S13.93 11 12 11s-3.5-1.57-3.5-3.5S10.07 4 12 4zm0 9c2.67 0 8 1.34 8 4v1H4v-1c0-2.66 5.33-4 8-4z'/%3E%3C/svg%3E";
@@ -545,6 +550,11 @@ export default function NavBar() {
   };
 
 const handleCandidaturasClick = (e) => {
+   if (isItemDisabled('candidaturas-nav')) {
+      e.preventDefault();
+      alert('Candidaturas estão desabilitadas no momento.');
+      return;
+    }
   e.preventDefault();
 
   if (!isAuthenticated()) {
@@ -661,39 +671,52 @@ const handleCVSave = (cvData) => {
       >
         <div className="header">
           <img className="w-[7rem] h-7 ml-14" src={logo} alt="Logo" />
-          <nav className="navbar">
-            <ul className="nav-list">
-              <li>
-                <Link to="/home" className="nav-link">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="/candidaturas"
-                  className="nav-link"
-                  onClick={handleCandidaturasClick}
-                >
-                  Candidaturas
-                  {!userCV && (
-                    <span className="ml-1 text-xs bg-red-500 text-white px-1 rounded">
-                      CV
-                    </span>
-                  )}
-                </a>
-              </li>
-              <li>
-                <Link to="/mentorias" className="nav-link">
-                  Mentorias
-                </Link>
-              </li>
-              <li>
-                <Link to="/sobrenos" className="nav-link">
-                  Sobre nós
-                </Link>
-              </li>
-            </ul>
-          </nav>
+        <nav className="navbar">
+      <ul className="nav-list">
+        <li>
+          <Link to="/home" className="nav-link">
+            Home
+          </Link>
+        </li>
+        <li>
+           <a
+            href="/candidaturas"
+            className={`nav-link ${isItemDisabled('candidaturas-nav') ? 'disabled' : ''}`}
+            onClick={handleCandidaturasClick}
+            style={{ 
+              opacity: isItemDisabled('candidaturas-nav') ? 0.5 : 1,
+              cursor: isItemDisabled('candidaturas-nav') ? 'not-allowed' : 'pointer',
+              textDecoration: isItemDisabled('candidaturas-nav') ? 'line-through' : 'none'
+            }}
+          >
+            Candidaturas
+            {/* Badge de CV obrigatório */}
+            {!userCV && (
+              <span className="ml-1 text-xs bg-red-500 text-white px-1 rounded">
+                CV
+              </span>
+            )}
+            {/* Badge de bloqueado */}
+            {isItemDisabled('candidaturas-nav') && (
+              <span className="ml-1 text-xs bg-gray-500 text-white px-1 rounded">
+                Bloqueado
+              </span>
+            )}
+          </a>
+        </li>
+        <li>
+          <Link to="/mentorias" className="nav-link">
+            Mentorias
+          </Link>
+        </li>
+        <li>
+          <Link to="/sobrenos" className="nav-link">
+            Sobre nós
+          </Link>
+        </li>
+      </ul>
+    </nav>
+
           <img
             className="w-6 h-6 absolute left-[68rem]"
             src={notificacao}

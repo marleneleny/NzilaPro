@@ -521,11 +521,11 @@ export default function Resultado({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2 p-3 bg-red-900/20 rounded-lg">
                       <EyeOff className="w-4 h-4 text-red-400" />
-                      <span className="text-gray-300">Sem mentoria: Visibilidade limitada</span>
+                      <span className="text-gray-300">Sem mentoria: Não poderá refazer o teste e ter visibilidade do perfil para as empresas</span>
                     </div>
                     <div className="flex items-center space-x-2 p-3 bg-green-900/20 rounded-lg">
                       <Eye className="w-4 h-4 text-green-400" />
-                      <span className="text-gray-300">Com mentoria: Perfil destacado</span>
+                      <span className="text-gray-300">Com mentoria: Poderá refazer o teste e conseguir se destacar</span>
                     </div>
                   </div>
                 </div>

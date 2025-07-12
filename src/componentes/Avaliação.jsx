@@ -20,6 +20,8 @@ import FirestoreService from "../services/firestoreEntrevista";
 import SpeechRecognitionService from "../services/speechService";
 import { useNavigate } from "react-router-dom";
 import * as faceapi from 'face-api.js';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 
 export default function Avaliacao() {
@@ -64,6 +66,9 @@ const [speechError, setSpeechError] = useState(null);
 const [speechService] = useState(() => {
   const service = new SpeechRecognitionService();
   
+
+  
+ 
   service.setOnResult(({ final, interim }) => {
     setTranscription(final + interim);
   });
@@ -1187,6 +1192,7 @@ const saveResponse = (blob, finalTranscript) => {
 
   // Iniciar entrevista
   const startInterview = async () => {
+    
     if (questions.length === 0) {
       alert("Aguarde o carregamento das perguntas...");
       return;
@@ -1196,6 +1202,7 @@ const saveResponse = (blob, finalTranscript) => {
     setInterviewStarted(true);
     setTimeLeft(questions[0]?.timeLimit || 120);
     startRecording();
+    
   };
 
   // Próxima pergunta

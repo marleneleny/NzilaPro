@@ -41,15 +41,15 @@ export default function NzilaMentoriaSystem() {
       title: "Inteligência emocional no mercado de trabalho",
       description:
         "Aprenda a controlar emoções, comunicar-se com equilíbrio e demonstrar confiança em entrevistas e no ambiente profissional.",
-      mentor: "Isabel Quengue",
+      mentor: "Adriana Cubas",
       mentorRole: "Profissional de RH",
       image:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=250&fit=crop",
-      duration: "3h 45min",
+      duration: "24min",
       students: 1250,
-      modules: 4,
+      modules: 1,
       rating: 4.8,
-      isNew: true,
+      
     },
     {
       id: 2,
@@ -91,37 +91,11 @@ export default function NzilaMentoriaSystem() {
           title: "Fundamentos da Inteligência Emocional",
           description:
             "Entenda o que é inteligência emocional, seus pilares e como ela impacta diretamente sua carreira e bem-estar no trabalho.",
-          lessons: 8,
-          duration: "1h 15min",
+          lessons: 2,
+          duration: "24min",
           isNew: true,
         },
-        {
-          id: 2,
-          title: "Autoconsciência e Autogestão",
-          description:
-            "Aprenda a reconhecer suas emoções, identificar seus gatilhos e gerenciar reações para manter o controle sob pressão.",
-          lessons: 6,
-          duration: "55min",
-          isNew: false,
-        },
-        {
-          id: 3,
-          title: "Empatia e Habilidades Sociais",
-          description:
-            "Desenvolva a capacidade de entender as emoções dos outros e aprimore sua comunicação para construir relacionamentos profissionais sólidos.",
-          lessons: 7,
-          duration: "1h 10min",
-          isNew: false,
-        },
-        {
-          id: 4,
-          title: "Inteligência Emocional na Prática Profissional",
-          description:
-            "Aplique a inteligência emocional para lidar com feedback, resolver conflitos e se destacar em entrevistas e reuniões de equipe.",
-          lessons: 5,
-          duration: "45min",
-          isNew: false,
-        },
+        
       ],
       prerequisites:
         "Recomendado para profissionais em qualquer fase da carreira que desejam melhorar sua performance e relações interpessoais.",
@@ -140,13 +114,13 @@ export default function NzilaMentoriaSystem() {
       {
         id: 1,
         title: "Fundamentos da Inteligência Emocional - Aula 1",
-        videoUrl: "https://rr1---sn-4g5lzner.googlevideo.com/videoplayback?expire=1752218599&ei=h2dwaKiOFezV0u8PuvreCQ&ip=104.28.225.223&id=o-ACUfdm_6cN7KDJZ9akLO3LEHD9D85om7H8FwCGT7HkG_&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1752196999%2C&mh=uE&mm=31%2C26&mn=sn-4g5lzner%2Csn-c0q7lnse&ms=au%2Conr&mv=m&mvi=1&pl=24&rms=au%2Cau&initcwndbps=2093750&bui=AY1jyLO_4paM7tzI3v59rd8XyNTAdMYCzNWU789LsSr-BDwWixUbq7IyzgjtohuFI_PEqdtYIzgVlHGq&vprv=1&svpuc=1&mime=video%2Fmp4&ns=llASKoEQZygV55O-Est-JlUQ&rqh=1&cnr=14&ratebypass=yes&dur=863.294&lmt=1736081059010912&mt=1752196850&fvip=4&lmw=1&fexp=51476175&c=TVHTML5&sefc=1&txp=4538434&n=MeXuP9vav2-8pQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AJfQdSswRQIgMX7-Y38lO5c0UCQzA3hKuHHNQHRev7BcMoFBbOvKCXYCIQD_d7F_TliRIUx5jIxUMTmSAoSua4EsO-jdg8oi9cvK6A%3D%3D&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIhAOr-ZnzVlc9KHjbfIOQYduF3HTqSy_DV1pQxuPG6t4W9AiB7p4qzg4qdRXRLCmm2bWDqiLJe_J9CA3W0JyVaNhFBBA%3D%3D&title=INTELIGENCIA+EMOCIONAL+NO+TRABALHO+-+Como+reconhecer+e+usar+suas+emo%C3%A7%C3%B5es+na+sua+vida+profissional",
+        videoUrl: "https://rr5---sn-vgqsrn6l.googlevideo.com/videoplayback?expire=1752264059&ei=GxlxaNKGNvPUsfIPx4jVkQg&ip=2a09%3Abac1%3A76c0%3Add10%3A%3A21e%3A13a&id=o-AAYGHPbGYg72LvFkYs689-_kTiXbkKF6XcZON7eHhnsU&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1752242459%2C&mh=uE&mm=31%2C29&mn=sn-vgqsrn6l%2Csn-vgqskn6z&ms=au%2Crdu&mv=m&mvi=5&pl=42&rms=au%2Cau&initcwndbps=3650000&bui=AY1jyLPhXgoTnvWdf0ePDokGrBULBovTZ7UoEXRiVireN6uSehtM82lQm9yMcP6SdYUwKoAD1c_Va_FZ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=AbMXc8XtqrvnxB2_3MV-4OkQ&rqh=1&cnr=14&ratebypass=yes&dur=863.294&lmt=1736081059010912&mt=1752242021&fvip=2&lmw=1&c=TVHTML5&sefc=1&txp=4538434&n=N2e22ZHsTrSIYw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AJfQdSswRQIgfP9REKhxcfnkmDC80Ocd4UBQ2c15AJREk0rtKU4PcaoCIQCW_c-lYXb8lx0lmMclUmPMyvAsz6S5D_EZYmI7wcxdyQ%3D%3D&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAI85wiFnp0Om-s_MyOAVRSr-ujvhvrzTxN51otGoyHxaAiEAhryqErUfXIGpUkW13fNG8gSAbM-By9sa8zLGIIeC_2g%3D&title=INTELIGENCIA+EMOCIONAL+NO+TRABALHO+-+Como+reconhecer+e+usar+suas+emo%C3%A7%C3%B5es+na+sua+vida+profissional",
         materialUrl: IE,
       },
       {
         id: 2,
         title: "Fundamentos da Inteligência Emocional - Aula 2",
-        videoUrl: "https://rr3---sn-aigl6n6s.googlevideo.com/videoplayback?expire=1752220411&ei=m25waKS_BbiLvdIP1YPMsAI&ip=104.28.229.14&id=o-ALZiwhjQ2x64ZF3a99Ockvs60U06P5rZN0WU57lCLvdo&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1752198811%2C&mh=iL&mm=31%2C26&mn=sn-aigl6n6s%2Csn-4g5e6nzs&ms=au%2Conr&mv=m&mvi=3&pl=24&rms=au%2Cau&initcwndbps=5553750&bui=AY1jyLNLELwbi5pGa3tS9vjOYwtb3Z84H24-mMR4Sb63tm0TaXoUMp_Za7CfBvHz_6pPTr5l-F8OSl5E&vprv=1&svpuc=1&mime=video%2Fmp4&ns=Nqx7ONVHLkV0rZjwA21yC2YQ&rqh=1&gir=yes&clen=31646235&ratebypass=yes&dur=618.277&lmt=1749682159455572&mt=1752198536&fvip=2&lmw=1&fexp=51476174&c=TVHTML5&sefc=1&txp=5308224&n=tcm9Z7EcYfoFUA&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&sig=AJfQdSswRQIhAPi_fTrNw4xB-OvEgScoFhrnEPf7Q0P3HPDz8bPdE7EXAiAglQfpn7h-ljx1JvuwAy2esjhOAX6M-ivyw8wk0kV0TQ%3D%3D&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIhAK9ORL0BJMsaSylmMTZajo1q2QZ-mKFX3D0ESY7Wy44-AiAz3Ib8P-l0o_pBQmBQWpTqM7ntWfszqkwnBLPGFOf2NA%3D%3D&title=Tudo+sobre+INTELIG%C3%8ANCIA+EMOCIONAL",
+        videoUrl: "https://rr5---sn-vgqsrn6l.googlevideo.com/videoplayback?expire=1752264059&ei=GxlxaNKGNvPUsfIPx4jVkQg&ip=2a09%3Abac1%3A76c0%3Add10%3A%3A21e%3A13a&id=o-AAYGHPbGYg72LvFkYs689-_kTiXbkKF6XcZON7eHhnsU&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1752242459%2C&mh=uE&mm=31%2C29&mn=sn-vgqsrn6l%2Csn-vgqskn6z&ms=au%2Crdu&mv=m&mvi=5&pl=42&rms=au%2Cau&initcwndbps=3650000&bui=AY1jyLPhXgoTnvWdf0ePDokGrBULBovTZ7UoEXRiVireN6uSehtM82lQm9yMcP6SdYUwKoAD1c_Va_FZ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=AbMXc8XtqrvnxB2_3MV-4OkQ&rqh=1&cnr=14&ratebypass=yes&dur=863.294&lmt=1736081059010912&mt=1752242021&fvip=2&lmw=1&c=TVHTML5&sefc=1&txp=4538434&n=N2e22ZHsTrSIYw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AJfQdSswRQIgfP9REKhxcfnkmDC80Ocd4UBQ2c15AJREk0rtKU4PcaoCIQCW_c-lYXb8lx0lmMclUmPMyvAsz6S5D_EZYmI7wcxdyQ%3D%3D&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAI85wiFnp0Om-s_MyOAVRSr-ujvhvrzTxN51otGoyHxaAiEAhryqErUfXIGpUkW13fNG8gSAbM-By9sa8zLGIIeC_2g%3D&title=INTELIGENCIA+EMOCIONAL+NO+TRABALHO+-+Como+reconhecer+e+usar+suas+emo%C3%A7%C3%B5es+na+sua+vida+profissional",
         materialUrl: IE,
       },
     ],
@@ -464,7 +438,7 @@ const WatchMentoria = ({ mentoria }) => {
                   profissionais sólidos e realistas, destacando-se em qualquer
                   ambiente.
                 </p>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-12 lg:grid-cols-3 gap-4 mb-6">
                   <div className="bg-black border border-[#525252] rounded-lg p-4 text-center">
                     {" "}
                     {/* Adjusted bg and border */}
@@ -500,23 +474,11 @@ const WatchMentoria = ({ mentoria }) => {
                     </div>{" "}
                     {/* Font Inter */}
                     <div className="font-semibold font-poppins">
-                      {mentoria.level}
+                      Iniciante 
                     </div>{" "}
                     {/* Font Poppins */}
                   </div>
-                  <div className="bg-black border border-[#525252] rounded-lg p-4 text-center">
-                    {" "}
-                    {/* Adjusted bg and border */}
-                    <Award className="w-6 h-6 text-[#BFF205] mx-auto mb-2" />
-                    <div className="text-sm text-[#D7D7D7]/70 font-inter">
-                      Certificado
-                    </div>{" "}
-                    {/* Font Inter */}
-                    <div className="font-semibold font-poppins">
-                      Incluído
-                    </div>{" "}
-                    {/* Font Poppins */}
-                  </div>
+                  
                 </div>
               </div>
 
@@ -546,11 +508,7 @@ const WatchMentoria = ({ mentoria }) => {
                       Conteúdos
                     </h3>{" "}
                     {/* Font Poppins */}
-                    <button className="text-[#BFF205] hover:text-[#bff205e3] text-sm font-medium font-poppins transition-colors">
-                      {" "}
-                      {/* Font Poppins */}
-                      Ver tudo →
-                    </button>
+                   
                   </div>
 
                   <div className="space-y-4">
@@ -570,13 +528,7 @@ const WatchMentoria = ({ mentoria }) => {
                                 MÓDULO {module.id}{" "}
                                 {/* Changed NÍVEL to MÓDULO for clarity */}
                               </span>
-                              {module.isNew && (
-                                <span className="bg-purple-600 px-2 py-1 rounded text-xs font-semibold font-poppins">
-                                  {" "}
-                                  {/* Font Poppins */}
-                                  NOVO
-                                </span>
-                              )}
+                              
                             </div>
                             <div className="text-sm text-[#D7D7D7]/70 font-inter">
                               {" "}
@@ -584,7 +536,7 @@ const WatchMentoria = ({ mentoria }) => {
                               {module.lessons} AULAS • {module.duration}
                             </div>
                           </div>
-                          <h4 className="font-semibold text-lg mb-2 font-poppins">
+                          <h4 className="font-semibold text-lg mb-2 font-poppins" >
                             {module.title}
                           </h4>{" "}
                           {/* Font Poppins */}
